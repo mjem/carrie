@@ -53,18 +53,18 @@ Requirements
 
 To run the server:
 
- * Python 2.7+ (programming language)
- * Flask (lightweight Python web server framework)
- * xdotool (command line tool to fake mouse and keyboard events)
- * xwininfo (command line tool to read window information)
+- Python 2.7+ (programming language)
+- Flask (lightweight Python web server framework)
+- xdotool (command line tool to fake mouse and keyboard events)
+- xwininfo (command line tool to read window information)
 
 To control the server:
 
- * Any modern web browser
+- Any modern web browser
 
 To use the mobile phone applet:
 
- * Mobile phone running Android Froyo or later
+- Mobile phone running Android Froyo or later
 
 Installation
 ------------
@@ -116,8 +116,8 @@ Development - server
 
 May wish to install:
 
- * python-pip
- * python-distribute
+- python-pip
+- python-distribute
 
 Development - Android application
 ---------------------------------
@@ -129,11 +129,11 @@ Compiling and installing the code should be the same as a standard Android appli
 Directory layout
 ----------------
 
- * android/
+- android/
   Android controller application
- * carrie/
+- carrie/
   Python HTTP server code
- * bin/
+- bin/
   Startup script
- * README.txt
+- README.txt
   This file

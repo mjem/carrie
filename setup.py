@@ -8,12 +8,12 @@ import distribute_setup
 distribute_setup.use_setuptools()
 
 #try:
-from setuptools import setup, find_packages
-from setuptools.command.build import build
+#from setuptools import setup, find_packages
+#from setuptools.command.build import build
 #except ImportError:
 #    from ez_setup import use_setuptools
 #    use_setuptools()
-#    from setuptools import setup, find_packages
+from setuptools import setup, find_packages
 
 # tests_require = [
     # 'flask',
@@ -52,7 +52,7 @@ setup(
 	#include_package_data=True,
 	package_data={'carrie': ['static/*.html', '*.css', '*.js', '*.png']},
 	#data_files=...
-	long_description=read('README.txt'),
+	long_description=read('README'),
 	# 			  entry_points = {
     #     'console_scripts': [
     #         'foo = my_package.some_module:main_func',
