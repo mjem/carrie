@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="org.ohthehumanity.carrie"
+    android:versionCode="1"
+    android:versionName="1.0" >
+
+  <!-- SDK 7 not supported you get errors like:
+Error: String types not allowed (at layout_height with value 'match_parent')
+Error: String types not allowed (at layout_width with value 'match_parent')
+
+because it needs fill_parent instead.
+
+And maybe other issues...
+
+So we target API 8 Froyo and above only.
+
+-->
+
+    <uses-sdk android:minSdkVersion="8" />
+
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application
+        android:icon="@drawable/carrie"
+        android:label="@string/app_name" >
+        <activity
+            android:name=".CarrieActivity" >
+            android:label="@string/title"
+            <intent-filter >
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".settings.Settings"
+            android:label="@string/settings_title">
+        </activity>
+    </application>
+</manifest>

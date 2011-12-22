@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" android:title="@string/settings_title">
+    <PreferenceCategory android:summary="application settings" android:title="Connection">
+        <EditTextPreference android:summary="Server name or IP address" android:title="Server address" android:dialogTitle="Target server" android:key="server"/>
+        <EditTextPreference android:summary="TCP port to connect to" android:title="Port" android:dialogTitle="Server port" android:key="port" android:defaultValue="5505" android:numeric="integer" />
+    </PreferenceCategory><PreferenceCategory android:title="User interface">
+        <EditTextPreference android:key="small_skip" android:summary="Number of seconds to nudge forward or backward" android:title="Small skip" android:dialogTitle="Small skip value (s)" android:defaultValue="7" android:numeric="integer" />
+        <EditTextPreference android:key="large_skip" android:summary="Number of seconds to skip forwards or backwards" android:title="Large skip" android:dialogTitle="Large skip (s)" android:defaultValue="60" android:numeric="integer" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="About">
+        <Preference android:title="Carrie Remote Control" android:summary="@string/version" />
+        <Preference android:title="Homepage" android:summary="@string/homepage" />
+    </PreferenceCategory>
+</PreferenceScreen>

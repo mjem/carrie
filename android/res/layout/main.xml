@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical">
+
+	<TableLayout
+		android:layout_height="wrap_content"
+		android:layout_width="fill_parent" >
+
+		<View
+			android:layout_height="8dip"
+			android:background="#00FFFFFF" />
+
+		<TableRow>
+		    <Button
+		        android:id="@+id/play"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+				android:padding="30sp"
+				android:layout_span="3"
+		        android:text="@string/pause"
+		        android:onClick="onPlay" />
+		</TableRow>
+
+		<View
+			android:layout_height="12dip"
+			android:background="#FF808080" />
+
+		<TableRow>
+			<Button
+				android:id="@+id/backwards"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="Backward"
+        		android:onClick="onBackwards" />
+
+	        <TextView
+				android:id="@+id/nudge_seconds"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:gravity="center"
+				android:text="" />
+
+			<Button
+				android:id="@+id/forwards"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="Forward"
+        		android:onClick="onForwards" />
+
+		</TableRow>
+
+    <TableRow>
+
+        <Button
+            android:id="@+id/bbackwards"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Skip back"
+        	android:onClick="onBBackwards" />
+
+		<TextView
+            android:id="@+id/skip_seconds"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+			android:gravity="center"
+            android:text="" />
+
+        <Button
+            android:id="@+id/fforwards"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Skip forward"
+        	android:onClick="onFForwards" />
+
+    </TableRow>
+
+	 <View
+        android:layout_height="8dip"
+        android:background="#FF808080" />
+
+	 <TableRow>
+	        <TextView
+            android:id="@+id/textView10"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="" />
+
+        <Button
+            android:id="@+id/voldown"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Volume down"
+        	android:onClick="onVoldown" />
+
+        <Button
+            android:id="@+id/volup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Volume up"
+        	android:onClick="onVolup" />
+	 </TableRow>
+
+	 <View
+        android:layout_height="8dip"
+        android:background="#00FFFFFF" />
+
+	 <TableRow>
+
+        <Button
+            android:id="@+id/osdon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/osdon"
+        	android:onClick="onOSDOn" />
+
+        <Button
+            android:id="@+id/osdoff"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/osdoff"
+        	android:onClick="onOSDOff" />
+
+        <Button
+            android:id="@+id/fullscreen"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/fullscreen"
+			android:onClick="onFullscreen" />
+
+     </TableRow>
+
+    <TableRow>
+        <Button
+            android:id="@+id/subtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/subtitles"
+        	android:onClick="onSub" />
+
+        <Button
+            android:id="@+id/sublang"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/sublang"
+        	android:onClick="onSubLang" />
+
+        <Button
+            android:id="@+id/audlang"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/audlang"
+        	android:onClick="onAudLang" />
+
+    </TableRow>
+</TableLayout>
+
+    <LinearLayout
+        android:id="@+id/linearLayout2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <TextView
+            android:id="@+id/textView1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/status" />
+
+        <TextView
+            android:id="@+id/status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="" />
+
+    </LinearLayout>
+
+ </LinearLayout>
