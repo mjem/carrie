@@ -28,7 +28,7 @@ def read(fname):
 
 setup(
     name='carrie',
-    version='0.1',
+    version='0.2dev',
     author='Mike Elson',
     author_email='mike.elson@gmail.com',
     url='http://github.com/mjem/carrie',

@@ -81,24 +81,31 @@
         android:background="#FF808080" />
 
 	 <TableRow>
-	        <TextView
+	       <!--  <TextView
             android:id="@+id/textView10"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="" />
+            android:text="" /> -->
+
+        <Button
+            android:id="@+id/mute"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/mute"
+        	android:onClick="onMute" />
 
         <Button
             android:id="@+id/voldown"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Volume down"
+            android:text="@string/voldown"
         	android:onClick="onVoldown" />
 
         <Button
             android:id="@+id/volup"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Volume up"
+            android:text="@string/volup"
         	android:onClick="onVolup" />
 	 </TableRow>
 

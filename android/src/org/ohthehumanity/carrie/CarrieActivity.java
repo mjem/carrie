@@ -6,6 +6,8 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
 
 import org.apache.http.conn.ConnectTimeoutException;
 
@@ -27,8 +29,13 @@ import org.ohthehumanity.carrie.settings.Settings;
  **/
 
 public class CarrieActivity extends Activity implements OnSharedPreferenceChangeListener {
+public enum Status {
+	OK, INTERNAL_ERROR, NO_CONNECTION, TIMEOUT, BAD_URL, NETWORK_ERROR, SERVER_ERROR };
+
 	private static final String TAG = "carrie";
 	private SharedPreferences preferences;
+	//private string connection_status;
+	//private string server_name;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -63,94 +70,100 @@ public class CarrieActivity extends Activity implements OnSharedPreferenceChange
 	/** Handle network commands in a separate Task thread
 	 **/
 
-	private class SendCommandTask extends AsyncTask<String, Integer, String> {
-		private InputStream OpenHttpConnection(String urlString)
-			throws IOException
+	private abstract class HTTPTask extends AsyncTask<String, Integer, String> {
+		// TBD split no connection into NO_ROUTE and NO_SERVER
+		protected CarrieActivity.Status status;
+
+		protected String response;
+
+		protected String url;
+
+		protected void retrieve(String request)
 		{
-			InputStream in = null;
-			int response = -1;
+			url = request;
+			URL urlobj;
+			try {
+				urlobj = new URL(request);
+			} catch (MalformedURLException e) {
+				status = CarrieActivity.Status.BAD_URL;
+				return;
+			}
+			URLConnection conn;
+			try {
+				conn = urlobj.openConnection();
+			} catch (IOException e) {
+				status = CarrieActivity.Status.NO_CONNECTION;
+				return;
+			}
+			Log.i(TAG, "Opening URL " + request);
 
-			URL url = new URL(urlString);
-			URLConnection conn = url.openConnection();
-
-			Log.i(TAG, "Opening URL ".concat(urlString));
-
-			if (!(conn instanceof HttpURLConnection))
-				throw new IOException("Not an HTTP connection");
-
-			//try{
 			HttpURLConnection httpConn = (HttpURLConnection) conn;
 			httpConn.setAllowUserInteraction(false);
 			httpConn.setInstanceFollowRedirects(true);
-			httpConn.setRequestMethod("GET");
-			//		  try {
-			setStatus("connecting to ".concat(urlString));
+			try {
+				httpConn.setRequestMethod("GET");
+			} catch (ProtocolException e) {
+				status = CarrieActivity.Status.INTERNAL_ERROR;
+				return;
+			}
 			try {
 				httpConn.connect();
 			} catch (ConnectTimeoutException e) {
 				Log.i(TAG, "timeout");
-				setStatus("connection timeout");
+				status = CarrieActivity.Status.TIMEOUT;
+				return;
 			} catch (IOException e) {
 				Log.i(TAG, "ioexception");
-				setStatus("Cannot connect to " +
-						  preferences.getString("server","") +
-						  ":" +
-						  preferences.getString("port", ""));
+				status = CarrieActivity.Status.NO_CONNECTION;
+				return;
 			}
 			Log.i(TAG, "Sending request");
 
-			response = httpConn.getResponseCode();
-			if (response == HttpURLConnection.HTTP_OK) {
-				in = httpConn.getInputStream();
-			}
-			Log.i(TAG, "Got result");
-
-			return in;
-		}
-
-		/** Command the server process by requesting URL `commnad` on the server
-		 **/
-
-		private String send(String command)
-		{
-			Log.i(TAG, "send " + command);
-			InputStream in = null;
+			int response_code;
 			try {
-				in = OpenHttpConnection("http://" +
-										preferences.getString("server",null) +
-										":" +
-										preferences.getString("port", null) +
-										"/" +
-										command);
-			} catch(ConnectTimeoutException e) {
-				return "Connection timeout";
+				response_code = httpConn.getResponseCode();
 			} catch (IOException e) {
-				return e.getMessage();
+				status = CarrieActivity.Status.INTERNAL_ERROR;
+				return;
 			}
-			if (in == null) {
-				return "server could not interpret command";
+			if (response_code != HttpURLConnection.HTTP_OK) {
+				status = CarrieActivity.Status.SERVER_ERROR;
+				return;
 			}
+			Log.i(TAG, "Got response code " + response_code);
+			InputStream in;
+			try {
+				in = httpConn.getInputStream();
+			} catch (IOException e) {
+				status = CarrieActivity.Status.INTERNAL_ERROR;
+				return;
+			}
+
 			InputStreamReader isr = new InputStreamReader(in);
 			int charRead;
-			String str = "";
 			int BUFFER_SIZE = 2000;
 			char[] inputBuffer = new char[BUFFER_SIZE];
+			response = "";
 			try {
 				while ((charRead = isr.read(inputBuffer))>0)
 					{
 						String readString =
 							String.copyValueOf(inputBuffer, 0, charRead);
-						str += readString;
+						response += readString;
 						inputBuffer = new char[BUFFER_SIZE];
 					}
 				in.close();
 			} catch (IOException e) {
 				e.printStackTrace();
-				return "";
+				status = CarrieActivity.Status.NETWORK_ERROR;
+				return;
 			}
-			return str;
+			status = CarrieActivity.Status.OK;
+			Log.i(TAG, "Server response was " + response);
 		}
 
+		/** Update the status area in the main screen
+		 **/
 		protected void setStatus(String message) {
 			final String m = new String(message);
 			runOnUiThread(new Runnable() {
@@ -161,12 +174,62 @@ public class CarrieActivity extends Activity implements OnSharedPreferenceChange
 				});
 		}
 
-		protected String doInBackground(String... url) {
-			Log.i(TAG, "doInBackground " + url[0]);
-			setStatus(send(url[0]));
-			return null;
+		protected String statusString() {
+			switch(status) {
+			case NO_CONNECTION:
+				return "Cannot connect to server";
+			case INTERNAL_ERROR:
+				return "Internal error";
+			case TIMEOUT:
+				return "Timeout";
+			case BAD_URL:
+				return "Bad url: " + url;
+			case NETWORK_ERROR:
+				return "Network error";
+			case SERVER_ERROR:
+				return "Server error";
+			default:
+				return "ok";
+			}
 		}
+	}
 
+	private class PingServerTask extends HTTPTask {
+		protected String doInBackground(String... url) {
+			setStatus("Requesting server name");
+			String target = preferences.getString("server",null) +
+				":" +
+				preferences.getString("port", null);
+			Log.i(TAG, "Calling retrieve");
+			retrieve("http://" +
+					 target +
+					 "/carrie/hello");
+			Log.i(TAG, "Done retrieve, status is " + status);
+			if (status == CarrieActivity.Status.OK) {
+				setStatus("Connected to " + response);
+			} else {
+				setStatus(statusString());
+			}
+			return "";
+		}
+	}
+
+	private class SendCommandTask extends HTTPTask {
+		protected String doInBackground(String... url) {
+			setStatus("Connecting...");
+			String target = preferences.getString("server",null) +
+				":" +
+				preferences.getString("port", null);
+			Log.i(TAG, "Calling retrieve");
+			retrieve("http://" + target + "/" + url[0]);
+			Log.i(TAG, "Done retrieve, status is " + status);
+			if (status == CarrieActivity.Status.OK) {
+				setStatus(response);
+			} else {
+				setStatus(statusString());
+			}
+			return "";
+		}
 	}
 
 	/** Set windoww status field
@@ -230,6 +293,10 @@ public class CarrieActivity extends Activity implements OnSharedPreferenceChange
 		command("osdoff");
 	}
 
+	public void onMute(View view) {
+		command("mute");
+	}
+
 	public void onVoldown(View view) {
 		command("voldown");
 	}
@@ -258,18 +325,23 @@ public class CarrieActivity extends Activity implements OnSharedPreferenceChange
 	}
 
 	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+		// Change the title bar to show target address and port
 		updateTitle();
+		// Change the labels showing how far jumps go
 		updateSkipLabels();
+		// Test the network connection
+		new PingServerTask().execute();
 	}
 
 	/** Update the window title bar to show server location
 	 **/
 
 	private void updateTitle() {
+		String vvv = "";
 		if (preferences.getString("server", null) == null) {
-			setTitle("Remote Control - server not set");
+			setTitle(vvv + "Remote Control - server not set");
 		} else {
-			setTitle("Remote Control - " +
+			setTitle(vvv + "Remote Control - " +
 					 preferences.getString("server", "") +
 					 ":" +
 					 preferences.getString("port", "5505"));

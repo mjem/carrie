@@ -22,10 +22,10 @@ Supplies a web site index page and dispatches media commands.
 
 import os
 import stat
+import socket
 import logging
 import argparse
 
-from flask import Flask, render_template  # url_for, request
 import flask
 import werkzeug
 
@@ -104,7 +104,7 @@ class Console(object):
 			#print
 			driver.send(command)
 
-app = Flask(__name__)
+app = flask.Flask(__name__)
 
 
 def send(command):
@@ -122,14 +122,21 @@ def send(command):
 @app.route('/')
 def index():
 	"""Send main index page template to browser."""
-	return render_template('index.html')
+	return flask.render_template('index.html')
 
 
 @app.route('/favicon.ico')
 def favicon():
+	"""Send static/favicon.png as a favicon"""
 	return flask.send_file(os.path.join(os.path.dirname(__file__), 'static', 'favicon.png'),
 						   mimetype='image/png')
 
+
+@app.route('/carrie/hello')
+def hello():
+	"""Response to a ping from the Android application with the host name
+	(the client may have been configured with IP address only)."""
+	return socket.gethostname()
 
 @app.route('/pause')
 def pause():

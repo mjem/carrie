@@ -1,4 +1,4 @@
--*- mode: rst -*-
+<!-- -*- mode: markdown -*- -->
 
 Carrie Remote Control
 =====================
@@ -66,15 +66,15 @@ To use the mobile phone applet:
 
 - Mobile phone running Android Froyo or later
 
-Installation
-------------
+Server installation
+-------------------
 
 First install the server:
 
-  > git clone xxx
-  > cd xxx
-  > python setup.py build
-  > sudo python setup.py install
+    > git clone xxx
+    > cd xxx
+    > python setup.py build
+    > sudo python setup.py install
 
 And optionally configure mplayer by editing $HOME/.mplayer/config and adding the line:
 
@@ -82,25 +82,30 @@ And optionally configure mplayer by editing $HOME/.mplayer/config and adding the
 
 Any new instances of mplayer will connect to the FIFO and listen to commands. This doesn't affect normal mplayer usage.
 
+Android application installation
+--------------------------------
+
+This project includes the Android application source in the `android` directory and a precompiled `carrie.apk` file for quick installation. It requires internet access permission to make connections to the server.
+
 Start the server
 ----------------
 
 Run:
 
- > carrie
+    > carrie
 
 This will start up the server, running in the foreground, listening on port 5505, using a FIFO on /tmp/mplayer.fif to communicate with mplayer. The FIFO will be created if it doesn't already exist.
 
 Run:
 
-  > carrie -h
+    > carrie -h
 
 to see available options.
 
 Control via browser
 -------------------
 
-Open a web browser on http://<server>:5505
+Open a web browser and visit: "http://<server>:5505"
 
 Control from Android device
 ---------------------------
@@ -135,5 +140,5 @@ Directory layout
   Python HTTP server code
 - bin/
   Startup script
-- README.txt
+- README.md
   This file

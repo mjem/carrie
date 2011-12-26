@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-	<string name="version">v0.1</string>
-	<string name="homepage">http://github/mjel</string>
+	<!-- misc -->
+	<string name="version">v0.2dev (b1)</string>
+	<string name="homepage">http://github/mjem</string>
 	<string name="app_name">Carrie remote control</string>
 	<string name="title">Carrie remote control</string>
 	<string name="menu_options">Options</string>
@@ -10,14 +11,17 @@
    	<string name="menu_exit">Exit</string>
    	<string name="settings_title">Carrie remote control settings</string>
 
+	<!-- application labels -->
 	<string name="pause">Pause/play</string>
+	<string name="mute">Mute</string>
+	<string name="voldown">Volume down</string>
+	<string name="volup">Volume up</string>
 	<string name="osdon">OSD on</string>
 	<string name="osdoff">OSD off</string>
 	<string name="fullscreen">Full screen</string>
 	<string name="audlang">Audio Lang</string>
 	<string name="sublang">Sub lang</string>
 	<string name="subtitles">Subtitles</string>
-
 	<string name="status">status: </string>
 
 </resources>

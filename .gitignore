@@ -16,3 +16,5 @@ carrie.egg-info
 build
 *.pyc
 env
+README.html
+android/carrie.keystore
