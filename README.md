@@ -30,10 +30,7 @@ If the client player is `mplayer` these additional functions are available:
 Screenshots
 -----------
 
-See the `docs` directory.
-
-![Preferences](doc/prefs.png)
-![Main screen](doc/carrie.png)
+See the `doc` directory.
 
 How does it work?
 -----------------
