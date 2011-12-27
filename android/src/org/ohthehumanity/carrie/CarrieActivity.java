@@ -1,5 +1,7 @@
 package org.ohthehumanity.carrie;
 
+import java.lang.InterruptedException;
+import java.util.concurrent.ExecutionException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -8,6 +10,10 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
+import java.util.Enumeration;
+import java.net.NetworkInterface;
+import java.net.InetAddress;
+import java.net.SocketException;
 
 import org.apache.http.conn.ConnectTimeoutException;
 
@@ -67,7 +73,7 @@ public enum Status {
 		setStatus("Ready");
 	}
 
-	/** Handle network commands in a separate Task thread
+	/** ABC to send a single network command in a separate Task thread
 	 **/
 
 	private abstract class HTTPTask extends AsyncTask<String, Integer, String> {
@@ -194,7 +200,10 @@ public enum Status {
 		}
 	}
 
-	private class PingServerTask extends HTTPTask {
+	/** Request the server name from a Carrie server and update the status
+		bar **/
+
+	private class GetServerNameTask extends HTTPTask {
 		protected String doInBackground(String... url) {
 			setStatus("Requesting server name");
 			String target = preferences.getString("server",null) +
@@ -214,6 +223,9 @@ public enum Status {
 		}
 	}
 
+	/** Send a command to the server and show the status
+	 **/
+
 	private class SendCommandTask extends HTTPTask {
 		protected String doInBackground(String... url) {
 			setStatus("Connecting...");
@@ -230,6 +242,57 @@ public enum Status {
 			}
 			return "";
 		}
+	}
+
+	private class PingServerTask extends HTTPTask {
+		protected String doInBackground(String... url) {
+			Log.i(TAG, "Scanning address " + url[0]);
+			retrieve("http://" + url[0] + ":5505");
+			if (status == CarrieActivity.Status.OK) {
+				Log.i(TAG, "  retrieve ok, response " + response);
+				return response;
+			} else {
+				Log.i(TAG, "  retrieve nok, status is " + status);
+				return "";
+			}
+		}
+	}
+
+	private class ScanServersTask extends HTTPTask {
+		protected String doInBackground(String... url)
+		{
+			Log.i(TAG, "Local IP is " + getLocalIpAddress().toString());
+			String address = "192.168.1.65";
+			Log.i(TAG, "Scanning address " + address);
+			String res = "";
+			PingServerTask t = new PingServerTask();
+			t.execute(address);
+			try {
+				Log.i(TAG, "PingServerTask returns " + t.get());
+			} catch (InterruptedException e) {
+				return "";
+			} catch (ExecutionException e) {
+				return "";
+			}
+			return "";
+		}
+	}
+
+	public String getLocalIpAddress() {
+		try {
+			for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements();) {
+				NetworkInterface intf = en.nextElement();
+				for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements();) {
+					InetAddress inetAddress = enumIpAddr.nextElement();
+					if (!inetAddress.isLoopbackAddress()) {
+						return inetAddress.getHostAddress();
+					}
+				}
+			}
+		} catch (SocketException ex) {
+			Log.e(TAG, ex.toString());
+		}
+		return null;
 	}
 
 	/** Set windoww status field
@@ -310,7 +373,8 @@ public enum Status {
 	}
 
 	public void onSubLang(View view) {
-		command("sublang");
+		new ScanServersTask().execute("");
+		//command("sublang");
 	}
 
 	public void onAudLang(View view) {
@@ -330,14 +394,14 @@ public enum Status {
 		// Change the labels showing how far jumps go
 		updateSkipLabels();
 		// Test the network connection
-		new PingServerTask().execute();
+		new GetServerNameTask().execute();
 	}
 
 	/** Update the window title bar to show server location
 	 **/
 
 	private void updateTitle() {
-		String vvv = "";
+		String vvv = "1 ";
 		if (preferences.getString("server", null) == null) {
 			setTitle(vvv + "Remote Control - server not set");
 		} else {

@@ -2,7 +2,8 @@
 
 import os
 
-del os.environ['PYTHONDONTWRITEBYTECODE']
+if 'PYTHONDONTWRITEBYTECODE' in os.environ:
+	del os.environ['PYTHONDONTWRITEBYTECODE']
 
 import distribute_setup
 distribute_setup.use_setuptools()
@@ -50,9 +51,10 @@ setup(
     # extras_require={'test': tests_require},
 	# test_suite='sentry.runtests.runtests',
 	#include_package_data=True,
-	package_data={'carrie': ['static/*.html', '*.css', '*.js', '*.png']},
-	#data_files=...
-	long_description=read('README'),
+	package_dir={'carrie': 'carrie'},
+	package_data={'carrie': ['static/*.js', 'static/*.css']},
+	data_files=[('carrie/static', ['index.js'])], 
+	long_description=read('README.md'),
 	# 			  entry_points = {
     #     'console_scripts': [
     #         'foo = my_package.some_module:main_func',
