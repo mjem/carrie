@@ -221,7 +221,7 @@ flash_types = {'youtube': {'name': 'YouTube',
 			   }
 
 
-def find_browser_with_flash_windows():
+def find_flash_windows():
 	"""Find windows where xwininfo name contains "Firefox" but is not equal to "Firefox"
 	and return win_info().
 	Returns:
@@ -281,42 +281,57 @@ def find_browser_with_flash_windows():
 	return res
 
 
+def find_top_flash_window():
+	flashes = find_flash_windows()
+
+	have_fs = False
+	for f in flashes:
+		if f['player']['priority'] == 2:
+			have_fs = True
+
+	if have_fs:
+		flashes = [f for f in flashes if f['player']['priority'] == 2]
+
+	if len(flashes) > 0:
+		return flashes[-1]
+
+	else:
+		return None
+
+
 def autocommand(command):
 	"""Click `command` on the first youtube/iplayer widget found.
 	If successful return None, else an error string.
 	"""
 
-	flashs = find_browser_with_flash_windows()
-	flashs.sort(reverse=True, key=lambda x: x['player']['priority'])
-	if len(flashs) > 0:
-		f = flashs[-1]  # flash info
-		if command not in f['player']:
-			return 'Command not supported for player ' + f['player']['name']
+	f = find_top_flash_window()
+	if f is None:
+		return "No flash player found"
 
-		p = f['player'][command]  # player info for 'play' operation
+	if command not in f['player']:
+		return 'Command not supported for player ' + f['player']['name']
 
-		if 'keypress' in p:
-			shell('xdotool', 'key', p['keypress'])
-			return
+	p = f['player'][command]  # player info for 'play' operation
 
-		if p['unit'] == 'px':
-			if p['x'] > 0:
-				x = p['x']
-			else:
-				x = f['w'] + p['x']
-
-			y = p['y']
-
-		elif p['unit'] == '%':
-			x = f['w'] * p['x'] / 100
-			y = f['h'] * p['y'] / 100
-
-		click_x = f['x'] + x
-		click_y = f['y'] + f['h'] - y
-		shell('xdotool', 'mousemove', str(click_x), str(click_y), 'click', '1')
+	if 'keypress' in p:
+		shell('xdotool', 'key', p['keypress'])
 		return
 
-	return 'No player found'
+	if p['unit'] == 'px':
+		if p['x'] > 0:
+			x = p['x']
+		else:
+			x = f['w'] + p['x']
+
+		y = p['y']
+
+	elif p['unit'] == '%':
+		x = f['w'] * p['x'] / 100
+		y = f['h'] * p['y'] / 100
+
+	click_x = f['x'] + x
+	click_y = f['y'] + f['h'] - y
+	shell('xdotool', 'mousemove', str(click_x), str(click_y), 'click', '1')
 
 
 def autopause():
@@ -356,11 +371,7 @@ if __name__ == '__main__':
 	args = parser.parse_args()
 
 	if args.find_flash:
-		flashs = find_browser_with_flash_windows()
-		flashs.sort(reverse=True, key=lambda x: x['player']['priority'])
-		for a in flashs:
-			logging.info('Result: ' + str(a))
-
+		print find_top_flash_window()
 		parser.exit()
 
 	if args.autopause:
