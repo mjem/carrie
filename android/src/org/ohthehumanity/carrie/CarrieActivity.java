@@ -246,7 +246,7 @@ public enum Status {
 
 	private class PingServerTask extends HTTPTask {
 		protected String doInBackground(String... url) {
-			Log.i(TAG, "Scanning address " + url[0]);
+			Log.i(TAG, "Pinging address " + url[0]);
 			retrieve("http://" + url[0] + ":5505");
 			if (status == CarrieActivity.Status.OK) {
 				Log.i(TAG, "  retrieve ok, response " + response);
