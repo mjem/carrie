@@ -9,7 +9,20 @@
 	<string name="menu_options">Options</string>
 	<string name="menu_back">Back</string>
    	<string name="menu_exit">Exit</string>
-   	<string name="settings_title">Carrie remote control settings</string>
+
+	<!-- Preferences -->
+   	<string name="pref_title">Carrie remote control settings</string>
+   	<string name="pref_cat_scan">Auto connection</string>
+   	<string name="pref_cat_connection">Manual connection</string>
+   	<string name="pref_cat_ui">User Interface</string>
+   	<string name="pref_cat_about">About</string>
+   	<string name="pref_scan">Scan</string> <!-- refered to in activity -->
+   	<string name="pref_server">Server address</string>
+   	<string name="pref_port">Port</string>
+   	<string name="pref_small_skip">Small skip</string>
+   	<string name="pref_large_skip">Large skip</string>
+   	<string name="pref_about_name">Carrie Remote Control</string>
+   	<string name="pref_about_homepage">Homepage</string> <!-- refered to in activity -->
 
 	<!-- application labels -->
 	<string name="pause">Pause/play</string>

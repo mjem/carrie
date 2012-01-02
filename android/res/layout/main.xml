@@ -81,18 +81,18 @@
         android:background="#FF808080" />
 
 	 <TableRow>
-	       <!--  <TextView
+	   <TextView
             android:id="@+id/textView10"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="" /> -->
+            android:text="" />
 
-        <Button
+        <!-- <Button
             android:id="@+id/mute"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/mute"
-        	android:onClick="onMute" />
+        	android:onClick="onMute" /> -->
 
         <Button
             android:id="@+id/voldown"

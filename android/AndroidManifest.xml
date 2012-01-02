@@ -32,8 +32,8 @@ So we target API 8 Froyo and above only.
             </intent-filter>
         </activity>
         <activity
-            android:name=".settings.Settings"
-            android:label="@string/settings_title">
+            android:name=".CarriePreferences"
+            android:label="@string/pref_title">
         </activity>
     </application>
 </manifest>

@@ -37,7 +37,7 @@ $(function () {
 	$("#bbackward").button({icons: {primary:'ui-icon-first'}}).on("click", send("backward/180"));
 	$("#fforward").button({icons: {secondary:'ui-icon-last'}}).on("click", send("forward/180"));
 	$("#voldown").button({icons: {primary:'ui-icon-minus'}}).on("click", send("voldown"));
-	$("#mute").button({icons: {secondary:'ui-icon-signal-diag'}}).on("click", send("mute"));
+	//$("#mute").button({icons: {secondary:'ui-icon-signal-diag'}}).on("click", send("mute"));
 	$("#volup").button({icons: {secondary:'ui-icon-plus'}}).on("click", send("volup"));
 	$("#osdon").button({icons: {primary:'ui-icon-bullet'}}).on("click", send("osdon"));
 	$("#osdoff").button({icons: {secondary:'ui-icon-radio-on'}}).on("click", send("osdoff"));

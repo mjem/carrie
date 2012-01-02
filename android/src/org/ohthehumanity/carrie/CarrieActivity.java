@@ -7,13 +7,20 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.Socket;
 import java.net.URLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.util.Enumeration;
 import java.net.NetworkInterface;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.SocketException;
+import java.util.List;
+import java.util.LinkedList;
+import java.util.ListIterator;
+import java.util.Iterator;
+//import java.util.concurrent.LinkedBlockingDeque;
 
 import org.apache.http.conn.ConnectTimeoutException;
 
@@ -28,43 +35,50 @@ import android.view.Menu;
 import android.view.View;
 import android.widget.TextView;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+//import android.preference.Preference.OnPreferenceClickListener;
+import android.preference.Preference;
+import android.app.AlertDialog;
 
-import org.ohthehumanity.carrie.settings.Settings;
+import org.ohthehumanity.carrie.CarriePreferences;
 
 /** Main window for the Carrie application.
  **/
 
-public class CarrieActivity extends Activity implements OnSharedPreferenceChangeListener {
-public enum Status {
-	OK, INTERNAL_ERROR, NO_CONNECTION, TIMEOUT, BAD_URL, NETWORK_ERROR, SERVER_ERROR };
+public class CarrieActivity extends Activity implements OnSharedPreferenceChangeListener//,
+														//														OnPreferenceClickListener
+{
+	public enum Status {
+		OK, INTERNAL_ERROR, NO_CONNECTION, TIMEOUT, BAD_URL, NETWORK_ERROR, SERVER_ERROR };
 
 	private static final String TAG = "carrie";
-	private SharedPreferences preferences;
+	private SharedPreferences mPreferences;
 	//private string connection_status;
-	//private string server_name;
+	private String mServerName;
 
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		mServerName = "";
 		setContentView(R.layout.main);
 
 		// instantiate our preferences backend
-		preferences = PreferenceManager.getDefaultSharedPreferences(this);
+		mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
 		// set callback function when settings change
-		preferences.registerOnSharedPreferenceChangeListener(this);
+		mPreferences.registerOnSharedPreferenceChangeListener(this);
+		//CarrieActivity.this.findPreference("scan").setOnPreferenceClickListener(this);
 
 		Log.i(TAG,
 			  "Startup, server '" +
-			  preferences.getString("server","") +
+			  mPreferences.getString("server","") +
 			  "' port " +
-			  preferences.getString("port", "") +
+			  mPreferences.getString("port", "") +
 			  " END");
 
-		if (preferences.getString("server", null) == null) {
+		if (mPreferences.getString("server", null) == null) {
 			setStatus("Server not set");
-		} else if (preferences.getString("port", null) == null) {
+		} else if (mPreferences.getString("port", null) == null) {
 			setStatus("Port not configured");
 		}
 
@@ -76,7 +90,7 @@ public enum Status {
 	/** ABC to send a single network command in a separate Task thread
 	 **/
 
-	private abstract class HTTPTask extends AsyncTask<String, Integer, String> {
+	private abstract class HTTPTask extends AsyncTask<String, Integer, Void> {
 		// TBD split no connection into NO_ROUTE and NO_SERVER
 		protected CarrieActivity.Status status;
 
@@ -170,15 +184,15 @@ public enum Status {
 
 		/** Update the status area in the main screen
 		 **/
-		protected void setStatus(String message) {
-			final String m = new String(message);
-			runOnUiThread(new Runnable() {
-					public void run() {
-						TextView updateView = (TextView) findViewById(R.id.status);
-						updateView.setText(m);
-					}
-				});
-		}
+		// protected void setStatus(String message) {
+		// 	final String m = new String(message);
+		// 	runOnUiThread(new Runnable() {
+		// 			public void run() {
+		// 				TextView updateView = (TextView) findViewById(R.id.status);
+		// 				updateView.setText(m);
+		// 			}
+		// 		});
+		// }
 
 		protected String statusString() {
 			switch(status) {
@@ -204,22 +218,27 @@ public enum Status {
 		bar **/
 
 	private class GetServerNameTask extends HTTPTask {
-		protected String doInBackground(String... url) {
-			setStatus("Requesting server name");
-			String target = preferences.getString("server",null) +
+		protected Void doInBackground(String... url) {
+			String target = mPreferences.getString("server",null) +
 				":" +
-				preferences.getString("port", null);
+				mPreferences.getString("port", null);
 			Log.i(TAG, "Calling retrieve");
 			retrieve("http://" +
 					 target +
 					 "/carrie/hello");
 			Log.i(TAG, "Done retrieve, status is " + status);
+			return null;
+		}
+
+		protected void onPostExecute(Void dummy) {
+			Log.i(TAG, "GetServerName.onPostExecute");
 			if (status == CarrieActivity.Status.OK) {
 				setStatus("Connected to " + response);
+				mServerName = response;
 			} else {
-				setStatus(statusString());
+				setStatus(statusString() + " " + mPreferences.getString("server",null));
 			}
-			return "";
+			updateTitle();
 		}
 	}
 
@@ -227,54 +246,163 @@ public enum Status {
 	 **/
 
 	private class SendCommandTask extends HTTPTask {
-		protected String doInBackground(String... url) {
-			setStatus("Connecting...");
-			String target = preferences.getString("server",null) +
+		protected Void doInBackground(String... url) {
+			String target = mPreferences.getString("server", null) +
 				":" +
-				preferences.getString("port", null);
+				mPreferences.getString("port", null);
 			Log.i(TAG, "Calling retrieve");
 			retrieve("http://" + target + "/" + url[0]);
 			Log.i(TAG, "Done retrieve, status is " + status);
+			return null;
+		}
+
+		protected void onPostExecute(Void dummy) {
+			Log.i(TAG, "onPostExecute");
 			if (status == CarrieActivity.Status.OK) {
 				setStatus(response);
 			} else {
 				setStatus(statusString());
 			}
-			return "";
 		}
 	}
 
-	private class PingServerTask extends HTTPTask {
-		protected String doInBackground(String... url) {
-			Log.i(TAG, "Pinging address " + url[0]);
-			retrieve("http://" + url[0] + ":5505");
-			if (status == CarrieActivity.Status.OK) {
-				Log.i(TAG, "  retrieve ok, response " + response);
-				return response;
-			} else {
-				Log.i(TAG, "  retrieve nok, status is " + status);
-				return "";
+	// private class PingServerTask extends HTTPTask {
+	// 	protected String doInBackground(String... url) {
+	// 		Log.i(TAG, "Pinging address " + url[0]);
+	// 		retrieve("http://" + url[0] + ":5505");
+	// 		if (status == CarrieActivity.Status.OK) {
+	// 			Log.i(TAG, "  retrieve ok, response " + response);
+	// 			return response;
+	// 		} else {
+	// 			Log.i(TAG, "  retrieve nok, status is " + status);
+	// 			return "";
+	// 		}
+	// 	}
+	// }
+
+	// private class ScanServersTask extends HTTPTask {
+	// 	protected String doInBackground(String... url)
+	// 	{
+	// 		Log.i(TAG, "Local IP is " + getLocalIpAddress().toString());
+	// 		List< PingServerTask > res = new LinkedList< PingServerTask >();
+	// 		for(int i=100; i<=120; i++) {
+	// 			String address = "192.168.0." + i;
+	// 			Log.i(TAG, "Scanning address " + address);
+	// 			//String res = "";
+	// 			PingServerTask t = new PingServerTask();
+	// 			t.execute(address);
+	// 			res.add(t);
+	// 		}
+	// 		for(PingServerTask t : res) {
+	// 			try {
+	// 				Log.i(TAG, "PingServerTask returns " + t.get());
+	// 			} catch (InterruptedException e) {
+	// 				return "";
+	// 			} catch (ExecutionException e) {
+	// 				return "";
+	// 			}
+	// 		}
+	// 		return "";
+	// 	}
+	// }
+
+	private class ScanServersTask extends AsyncTask<Void, String, LinkedList<String> > {
+		protected LinkedList<String> mServers;
+		//protected Object mLock;
+		protected CarrieActivity mActivity;
+
+		public ScanServersTask(CarrieActivity activity) {
+			super();
+			mActivity = activity;
+		}
+
+		private class Scanner extends Thread {
+			String _base_addr;
+			int _offset_addr;
+			int _port;
+			int _timeout;
+			ScanServersTask _task;
+			public Scanner(String base_addr, int offset_addr, int port, int timeout, ScanServersTask task) {
+				_base_addr = base_addr;
+				_offset_addr = offset_addr;
+				_port = port;
+				_task = task;
+			}
+
+			public void run() {
+				//Log.i(TAG, "threadstart");
+				Socket socket = new Socket();
+				String server = _base_addr + _offset_addr;
+				try {
+					socket.connect(new InetSocketAddress(InetAddress.getByName(server), _port), _timeout);
+				} catch(IOException e) {
+					//Log.i(TAG, "    cannot connect");
+					return;
+				}
+				Log.i(TAG, "    connection on " + server);
+				_task.callback(server);
 			}
 		}
-	}
 
-	private class ScanServersTask extends HTTPTask {
-		protected String doInBackground(String... url)
-		{
-			Log.i(TAG, "Local IP is " + getLocalIpAddress().toString());
-			String address = "192.168.1.65";
-			Log.i(TAG, "Scanning address " + address);
-			String res = "";
-			PingServerTask t = new PingServerTask();
-			t.execute(address);
-			try {
-				Log.i(TAG, "PingServerTask returns " + t.get());
-			} catch (InterruptedException e) {
-				return "";
-			} catch (ExecutionException e) {
-				return "";
+		public void callback(String addr) {
+			Log.i(TAG, "Callback " + addr);
+			//publishProgress(addr);
+			synchronized(this) {
+				mServers.add(addr);
 			}
-			return "";
+		}
+
+		protected void setStatus(String message) {
+			final String inner_message = new String(message);
+			runOnUiThread(new Runnable() {
+					public void run() {
+						TextView updateView = (TextView)findViewById(R.id.status);
+						updateView.setText(inner_message);
+					}
+				});
+		}
+
+		protected LinkedList<String> doInBackground(Void... params) {
+			mServers = new LinkedList<String>();
+			Log.i(TAG, "Begin scan");
+			String subnet = "192.168.0.";
+			setStatus("Scanning " + subnet + "* ...");
+			int timeout = 1000;
+			int port = Integer.parseInt(mPreferences.getString("port", null));
+			LinkedList<Scanner> scanners = new LinkedList<Scanner>();
+			for(int i=0; i<=255; i++) {
+				Scanner t = new Scanner(subnet, i, port, timeout, this);
+				scanners.add(t);
+				t.start();
+			}
+			Log.i(TAG, "End scan initiation, waiting for threads to exit");
+			for(Iterator<Scanner> i = scanners.iterator(); i.hasNext(); ) {
+				try {
+					i.next().join();
+				} catch(InterruptedException e) {
+				}
+			}
+			Log.i(TAG, "Threads dead, found " + mServers.size() + " servers");
+			return mServers;
+		}
+
+		protected void onPostExecute(LinkedList<String> servers) {
+			setStatus("Found " + mServers.size() + " servers");
+			switch(mServers.size()) {
+			case 0:
+				return;
+			case 1:
+				SharedPreferences.Editor editor = mPreferences.edit();
+				editor.putString("server", mServers.getFirst());
+				editor.commit();
+				return;
+			default:
+				AlertDialog.Builder alert = new AlertDialog.Builder(mActivity);
+				alert.setTitle("Choose server");
+				alert.setMessage("many - " + mServers.size());
+				alert.show();
+				return;
+			}
 		}
 	}
 
@@ -311,11 +439,12 @@ public enum Status {
 	 **/
 
 	public void command(String message) {
-		if (preferences.getString("server", null) == null ||
-			preferences.getString("port", null) == null) {
-			startActivity(new Intent(this, Settings.class));
+		if (mPreferences.getString("server", null) == null ||
+			mPreferences.getString("port", null) == null) {
+			startActivity(new Intent(this, CarriePreferences.class));
 		} else {
 			Log.i(TAG, "command");
+			setStatus("Connecting...");
 			new SendCommandTask().execute(message);
 		}
 	}
@@ -333,19 +462,19 @@ public enum Status {
 	}
 
 	public void onBackwards(View view) {
-		command("backward/" + preferences.getString("small_skip", "7"));
+		command("backward/" + mPreferences.getString("small_skip", "7"));
 	}
 
 	public void onForwards(View view) {
-		command("forward/" + preferences.getString("small_skip", "7"));
+		command("forward/" + mPreferences.getString("small_skip", "7"));
 	}
 
 	public void onBBackwards(View view) {
-		command("backward/" + preferences.getString("large_skip", "60"));
+		command("backward/" + mPreferences.getString("large_skip", "60"));
 	}
 
 	public void onFForwards(View view) {
-		command("forward/" + preferences.getString("large_skip", "60"));
+		command("forward/" + mPreferences.getString("large_skip", "60"));
 	}
 
 	public void onOSDOn(View view) {
@@ -373,8 +502,8 @@ public enum Status {
 	}
 
 	public void onSubLang(View view) {
-		new ScanServersTask().execute("");
-		//command("sublang");
+		//new ScanServersTask().execute();
+		command("sublang");
 	}
 
 	public void onAudLang(View view) {
@@ -384,31 +513,67 @@ public enum Status {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		Log.i(TAG, "onCreateOptionsMenu");
-		startActivity(new Intent(this, Settings.class));
+		//startActivity(new Intent(this, CarriePreferences.class));
+		startActivityForResult(new Intent(this, CarriePreferences.class), 1);
 		return false;
 	}
 
+	/** Automatically called when an activity (our preferences) that was started with
+		startActivityForResult exits **/
+
+	protected void onActivityResult(int requestCode,
+									int resultCode,
+									Intent data) {
+		Log.i(TAG, "activity result, request " + requestCode + " result " + resultCode);
+		if (requestCode == 1) { // change to check intent.scan = true
+			if (resultCode == RESULT_OK) {
+				// A contact was picked.  Here we will just display it
+				// to the user.
+				//				startActivity(new Intent(Intent.ACTION_VIEW, data));
+				Log.i(TAG, "Begin scan in correct thread");
+				new ScanServersTask(this).execute();
+			}
+		}
+	}
+
 	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+		mServerName = "";
 		// Change the title bar to show target address and port
 		updateTitle();
 		// Change the labels showing how far jumps go
 		updateSkipLabels();
 		// Test the network connection
+		setStatus("Requesting server name");
 		new GetServerNameTask().execute();
 	}
+
+	// public boolean onPreferenceClick (Preference preference) {
+	// 	Log.i(TAG, "onPreferencesClick " + preference.getTitle());
+	// 	if (preference.getTitle() == "Scan") {
+	// 		Log.i(TAG, "Scan request");
+	// 		return true;
+	// 	} else if (preference.getTitle() == "Homepage") {
+	// 		Log.i(TAG, "Open homepage");
+	// 		return true;
+	// 	} else {
+	// 		return false;
+	// 	}
+	// }
 
 	/** Update the window title bar to show server location
 	 **/
 
 	private void updateTitle() {
-		String vvv = "1 ";
-		if (preferences.getString("server", null) == null) {
-			setTitle(vvv + "Remote Control - server not set");
-		} else {
-			setTitle(vvv + "Remote Control - " +
-					 preferences.getString("server", "") +
+		String prelude = "Remote Control - ";
+		if (mPreferences.getString("server", null) == null) {
+			setTitle(prelude + "server not set");
+		} else if (mServerName.equals("")) {
+			setTitle(prelude +
+					 mPreferences.getString("server", "") +
 					 ":" +
-					 preferences.getString("port", "5505"));
+					 mPreferences.getString("port", "5505"));
+		} else {
+			setTitle(prelude + mServerName);
 		}
 	}
 
@@ -419,8 +584,8 @@ public enum Status {
 
 	private void updateSkipLabels() {
 		((TextView)findViewById(R.id.nudge_seconds)).
-			setText(preferences.getString("small_skip", "7") + "s");
+			setText(mPreferences.getString("small_skip", "7") + "s");
 		((TextView)findViewById(R.id.skip_seconds)).
-			setText(preferences.getString("large_skip", "60") + "s");
+			setText(mPreferences.getString("large_skip", "60") + "s");
 	}
 }

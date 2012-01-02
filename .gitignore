@@ -7,7 +7,7 @@ android/.settings
 android/ant.properties
 android/bin
 android/gen
-carrie-release.keystore
+carrie.keystore
 dist
 carrie.egg-info
 *#
