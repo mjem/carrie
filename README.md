@@ -44,6 +44,11 @@ Limitations
 
 Since there is no API for communicating with Flash video, the server process sends fake mouse events for control. This has to be configured for each combination of browser and video site.
 
+License
+-------
+
+The server and application are licensed under the GPLv3.
+
 Why not just use x/y/z remote control instead of this?
 ------------------------------------------------------
 
@@ -102,7 +107,10 @@ Any new instances of mplayer will connect to the FIFO and listen to commands. Th
 Android application installation
 --------------------------------
 
-This project includes the Android application source in the `android` directory and a precompiled `carrie.apk` file for quick installation. It requires internet access permission to make connections to the server.
+This project includes the Android application source in the `android` directory and a precompiled `carrie.apk` file for quick installation. It requires permissions:
+
+- INTERNET: to make connections to the server
+- ACCESS_NETWORK_STATE: to test if wifi is active on startup
 
 Start the server
 ----------------

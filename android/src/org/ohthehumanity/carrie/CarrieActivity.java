@@ -1,7 +1,21 @@
+// Carrie Remote Control
+// Copyright (C) 2012 Mike Elson
+
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 package org.ohthehumanity.carrie;
 
-import java.lang.InterruptedException;
-import java.util.concurrent.ExecutionException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -11,42 +25,44 @@ import java.net.Socket;
 import java.net.URLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
-import java.util.Enumeration;
 import java.net.NetworkInterface;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
+import java.lang.InterruptedException;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.Iterator;
-//import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ExecutionException;
 
 import org.apache.http.conn.ConnectTimeoutException;
 
+import android.os.Bundle;
+import android.os.AsyncTask;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
-import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.TextView;
-import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
-//import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.Preference;
-import android.app.AlertDialog;
+import android.preference.PreferenceManager;
 import android.content.DialogInterface;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import android.net.ConnectivityManager;
 
 import org.ohthehumanity.carrie.CarriePreferences;
 
 /** Main window for the Carrie application.
  **/
 
-public class CarrieActivity extends Activity implements OnSharedPreferenceChangeListener//,
-														//														OnPreferenceClickListener
+public class CarrieActivity extends Activity implements OnSharedPreferenceChangeListener
 {
 	public enum Status {
 		OK, INTERNAL_ERROR, NO_CONNECTION, TIMEOUT, BAD_URL, NETWORK_ERROR, SERVER_ERROR };
@@ -68,7 +84,6 @@ public class CarrieActivity extends Activity implements OnSharedPreferenceChange
 
 		// set callback function when settings change
 		mPreferences.registerOnSharedPreferenceChangeListener(this);
-		//CarrieActivity.this.findPreference("scan").setOnPreferenceClickListener(this);
 
 		Log.i(TAG,
 			  "Startup, server '" +
@@ -81,6 +96,39 @@ public class CarrieActivity extends Activity implements OnSharedPreferenceChange
 			setStatus("Server not set");
 		} else if (mPreferences.getString("port", null) == null) {
 			setStatus("Port not configured");
+		}
+
+		ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+		if (cm.getActiveNetworkInfo().getType() !=
+			ConnectivityManager.TYPE_WIFI) {
+
+			AlertDialog.Builder dlgAlert  = new AlertDialog.Builder(this);
+			dlgAlert.setTitle("WiFi not active");
+			dlgAlert.setMessage("This application is usually used on a local network over a WiFi. Open WiFi settings?");
+			dlgAlert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int which) {
+						switch(which) {
+						case DialogInterface.BUTTON_POSITIVE:
+							//Yes button clicked
+							final Intent intent = new Intent(Intent.ACTION_MAIN, null);
+							intent.addCategory(Intent.CATEGORY_LAUNCHER);
+							final ComponentName cn = new ComponentName("com.android.settings", "com.android.settings.wifi.WifiSettings");
+							intent.setComponent(cn);
+							intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+							startActivity( intent);
+							break;
+
+						case DialogInterface.BUTTON_NEGATIVE:
+							Log.i(TAG, "Not opening wifi");
+							//No button clicked
+							break;
+						}
+					}
+				});
+
+			dlgAlert.setNegativeButton("No", null);
+			dlgAlert.setCancelable(true);
+			dlgAlert.create().show();
 		}
 
 		updateTitle();
@@ -185,18 +233,6 @@ public class CarrieActivity extends Activity implements OnSharedPreferenceChange
 			Log.i(TAG, "Server response was " + response);
 		}
 
-		/** Update the status area in the main screen
-		 **/
-		// protected void setStatus(String message) {
-		// 	final String m = new String(message);
-		// 	runOnUiThread(new Runnable() {
-		// 			public void run() {
-		// 				TextView updateView = (TextView) findViewById(R.id.status);
-		// 				updateView.setText(m);
-		// 			}
-		// 		});
-		// }
-
 		protected String statusString() {
 			switch(status) {
 			case NO_CONNECTION:
@@ -270,46 +306,6 @@ public class CarrieActivity extends Activity implements OnSharedPreferenceChange
 		}
 	}
 
-	// private class PingServerTask extends HTTPTask {
-	// 	protected String doInBackground(String... url) {
-	// 		Log.i(TAG, "Pinging address " + url[0]);
-	// 		retrieve("http://" + url[0] + ":5505");
-	// 		if (status == CarrieActivity.Status.OK) {
-	// 			Log.i(TAG, "  retrieve ok, response " + response);
-	// 			return response;
-	// 		} else {
-	// 			Log.i(TAG, "  retrieve nok, status is " + status);
-	// 			return "";
-	// 		}
-	// 	}
-	// }
-
-	// private class ScanServersTask extends HTTPTask {
-	// 	protected String doInBackground(String... url)
-	// 	{
-	// 		Log.i(TAG, "Local IP is " + getLocalIpAddress().toString());
-	// 		List< PingServerTask > res = new LinkedList< PingServerTask >();
-	// 		for(int i=100; i<=120; i++) {
-	// 			String address = "192.168.0." + i;
-	// 			Log.i(TAG, "Scanning address " + address);
-	// 			//String res = "";
-	// 			PingServerTask t = new PingServerTask();
-	// 			t.execute(address);
-	// 			res.add(t);
-	// 		}
-	// 		for(PingServerTask t : res) {
-	// 			try {
-	// 				Log.i(TAG, "PingServerTask returns " + t.get());
-	// 			} catch (InterruptedException e) {
-	// 				return "";
-	// 			} catch (ExecutionException e) {
-	// 				return "";
-	// 			}
-	// 		}
-	// 		return "";
-	// 	}
-	// }
-
 	private class ScanServersTask extends AsyncTask<Void, String, LinkedList<String> > {
 		protected LinkedList<String> mServers;
 		//protected Object mLock;
@@ -321,29 +317,32 @@ public class CarrieActivity extends Activity implements OnSharedPreferenceChange
 		}
 
 		private class Scanner extends Thread {
-			String _base_addr;
-			int _offset_addr;
-			int _port;
-			int _timeout;
-			ScanServersTask _task;
-			public Scanner(String base_addr, int offset_addr, int port, int timeout, ScanServersTask task) {
-				_base_addr = base_addr;
-				_offset_addr = offset_addr;
-				_port = port;
-				_task = task;
+			String mBaseAddr;
+			int mOffsetAddr;
+			int mPort;
+			int mTimeout;
+			ScanServersTask mTask;
+
+			public Scanner(String baseAddr, int offsetAddr, int port, int timeout, ScanServersTask task) {
+				mBaseAddr = baseAddr;
+				mOffsetAddr = offsetAddr;
+				mPort = port;
+				mTask = task;
 			}
 
 			public void run() {
 				//Log.i(TAG, "threadstart");
 				Socket socket = new Socket();
-				String server = _base_addr + _offset_addr;
+				String server = mBaseAddr + mOffsetAddr;
 				try {
-					socket.connect(new InetSocketAddress(InetAddress.getByName(server), _port), _timeout);
+					socket.connect(new InetSocketAddress(InetAddress.getByName(server), mPort),
+								   mTimeout);
 				} catch(IOException e) {
 					//Log.i(TAG, "    cannot connect");
 					try {
 						socket.close();
 					} catch(IOException e2) {
+						// ignore anything thrown by close()
 					}
 					return;
 				}
@@ -352,9 +351,13 @@ public class CarrieActivity extends Activity implements OnSharedPreferenceChange
 				} catch(IOException e) {
 				}
 				Log.i(TAG, "    connection on " + server);
-				_task.callback(server);
+				mTask.callback(server);
 			}
 		}
+
+		/** As each thread completes and exits, call this function to record the new server
+			if found
+		 **/
 
 		public void callback(String addr) {
 			Log.i(TAG, "Callback " + addr);
@@ -363,6 +366,9 @@ public class CarrieActivity extends Activity implements OnSharedPreferenceChange
 				mServers.add(addr);
 			}
 		}
+
+		/** Wrapper to update the status area of the main activity
+		 **/
 
 		protected void setStatus(String message) {
 			final String inner_message = new String(message);
@@ -374,12 +380,23 @@ public class CarrieActivity extends Activity implements OnSharedPreferenceChange
 				});
 		}
 
+		/** Initiate scan.
+			Each request is sent by a seperate thread so all 256 possible
+			IP addresses on the local /8 subnet can be tested in parallel
+		**/
+
 		protected LinkedList<String> doInBackground(Void... params) {
 			mServers = new LinkedList<String>();
-			Log.i(TAG, "Begin scan");
-			String subnet = "192.168.0.";
+			String full_ip = getLocalIpAddress();
+			int index = full_ip.lastIndexOf(".");
+			if (index == -1) {
+				Log.e(TAG, "Cannot decode IP " + full_ip);
+				return mServers;
+			}
+			String subnet = full_ip.substring(0, index + 1);
+			Log.i(TAG, "Begin scan of " + subnet);
 			setStatus("Scanning " + subnet + "* ...");
-			int timeout = 1000;
+			int timeout = 500; // ms
 			int port = Integer.parseInt(mPreferences.getString("port", null));
 			LinkedList<Scanner> scanners = new LinkedList<Scanner>();
 			for(int i=0; i<=255; i++) {
@@ -398,21 +415,25 @@ public class CarrieActivity extends Activity implements OnSharedPreferenceChange
 			return mServers;
 		}
 
+		/** After scan completed update the UI
+		 **/
+
 		protected void onPostExecute(LinkedList<String> servers) {
 			Log.d(TAG, "ScanServersTask.onPostExecute");
 			setStatus("Found " + mServers.size() + " servers");
 			switch(mServers.size()) {
 			case 0:
+				// no servers found
 				return;
 			case 1:
+				// single server found, automatically connect
 				Log.d(TAG, "Updating preferences");
 				setServer(servers.getFirst());
 				return;
 			default:
+				// multiple servers found, present the user with a choice dialog
 				AlertDialog.Builder alert = new AlertDialog.Builder(mActivity);
 				alert.setTitle("Choose server");
-				//alert.setMessage("many - " + mServers.size());
-				//final LinkedList<String> inner_servers = servers;
 				final String[] inner_servers = new String[servers.size()];
 				servers.toArray(inner_servers);
 				alert.setItems(inner_servers,
@@ -427,6 +448,10 @@ public class CarrieActivity extends Activity implements OnSharedPreferenceChange
 		}
 	}
 
+	/** Write a new string into our `server` preference and ping it to check
+		for the hostname
+	**/
+
 	public void setServer(String server) {
 		SharedPreferences.Editor editor = mPreferences.edit();
 		editor.putString("server", server);
@@ -436,9 +461,13 @@ public class CarrieActivity extends Activity implements OnSharedPreferenceChange
 
 	public String getLocalIpAddress() {
 		try {
-			for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements();) {
+			for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces();
+				 en.hasMoreElements();) {
+
 				NetworkInterface intf = en.nextElement();
-				for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements();) {
+				for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses();
+					 enumIpAddr.hasMoreElements();) {
+
 					InetAddress inetAddress = enumIpAddr.nextElement();
 					if (!inetAddress.isLoopbackAddress()) {
 						return inetAddress.getHostAddress();
@@ -448,7 +477,7 @@ public class CarrieActivity extends Activity implements OnSharedPreferenceChange
 		} catch (SocketException ex) {
 			Log.e(TAG, ex.toString());
 		}
-		return null;
+		return "";
 	}
 
 	/** Set windoww status field
@@ -477,6 +506,9 @@ public class CarrieActivity extends Activity implements OnSharedPreferenceChange
 		}
 	}
 
+	/** Handle click on Play/Pause button
+	 **/
+
 	public void onPlay(View view) {
 		setStatus("on play");
 		Log.i(TAG, "onPlay");
@@ -484,14 +516,23 @@ public class CarrieActivity extends Activity implements OnSharedPreferenceChange
 		command("pause");
 	}
 
+	/** Handle click on Fullscreen button
+	 **/
+
 	public void onFullscreen(View view) {
 		setStatus("on fullscreen");
 		command("fullscreen");
 	}
 
+	/** Handle click on little backwards button
+	 **/
+
 	public void onBackwards(View view) {
 		command("backward/" + mPreferences.getString("small_skip", "7"));
 	}
+
+	/** Handle click on little forwards button
+	 **/
 
 	public void onForwards(View view) {
 		command("forward/" + mPreferences.getString("small_skip", "7"));
@@ -552,17 +593,12 @@ public class CarrieActivity extends Activity implements OnSharedPreferenceChange
 	protected void onActivityResult(int requestCode,
 									int resultCode,
 									Intent data) {
-		//Log.i(TAG, "activity result, request " + requestCode + " result " + resultCode);
 		if (data == null) {
 			Log.i(TAG, "Preferences closed no scan requested");
 		} else {
 			Log.i(TAG, "Preferences closed scan is " + data.getBooleanExtra("scan", false));
 		}
-		// if (requestCode == 1) { // change to check intent.scan = true
-		// 	if (resultCode == RESULT_OK) {
-				// A contact was picked.  Here we will just display it
-				// to the user.
-				//				startActivity(new Intent(Intent.ACTION_VIEW, data));
+
 		if (data != null && data.getBooleanExtra("scan", false) == true) {
 			Log.i(TAG, "Begin scan in correct thread");
 			new ScanServersTask(this).execute();
@@ -571,6 +607,9 @@ public class CarrieActivity extends Activity implements OnSharedPreferenceChange
 			updateServerName();
 		}
 	}
+
+	/** Callback when a preference is changed, either through code or the preferences screen
+	 **/
 
 	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
 		mServerName = "";
@@ -583,18 +622,9 @@ public class CarrieActivity extends Activity implements OnSharedPreferenceChange
 		//new GetServerNameTask().execute();
 	}
 
-	// public boolean onPreferenceClick (Preference preference) {
-	// 	Log.i(TAG, "onPreferencesClick " + preference.getTitle());
-	// 	if (preference.getTitle() == "Scan") {
-	// 		Log.i(TAG, "Scan request");
-	// 		return true;
-	// 	} else if (preference.getTitle() == "Homepage") {
-	// 		Log.i(TAG, "Open homepage");
-	// 		return true;
-	// 	} else {
-	// 		return false;
-	// 	}
-	// }
+	/** Update the window title and status area to show the target server name
+		as returned by a check on url http://<servername>:<port>/carrie/hello
+	 **/
 
 	private void updateServerName() {
 		setStatus("Requesting server name");

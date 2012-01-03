@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 # Carrie Remote Control
-# Copyright (C) 2011 Mike Elson
+# Copyright (C) 2012 Mike Elson
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by

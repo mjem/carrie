@@ -1,3 +1,5 @@
+// Taken from posts on http://stackoverflow.com/questions/4284224/android-hold-button-to-repeat-action
+
 package org.ohthehumanity.carrie;
 
 import android.content.Context;
