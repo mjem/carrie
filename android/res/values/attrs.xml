@@ -1,0 +1,6 @@
+<resources>
+<declare-styleable name="AutoRepeatButton">
+    <attr name="initial_delay"  format="integer" />
+    <attr name="repeat_interval"  format="integer" />
+</declare-styleable>
+</resources>

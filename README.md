@@ -54,6 +54,15 @@ Other remote controls I would recommend are:
 - sshmote: A media center for Android. Does not need any special server software except a Unix compatible OS running an SSH server.
 - teamviewer: Take control of a Windows or Linux machine from a web browser or phone.
 
+Minor features
+--------------
+
+Just because they all had to be compiled in...
+
+- To test the server connection press MENU then BACK
+- Volume up/down have auto repeat
+- If multiple flash windows are found the one nearest the front is used
+
 Requirements
 ------------
 

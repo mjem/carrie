@@ -38,6 +38,7 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 //import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.Preference;
 import android.app.AlertDialog;
+import android.content.DialogInterface;
 
 import org.ohthehumanity.carrie.CarriePreferences;
 
@@ -84,7 +85,7 @@ public class CarrieActivity extends Activity implements OnSharedPreferenceChange
 
 		updateTitle();
 		updateSkipLabels();
-		setStatus("Ready");
+		updateServerName();
 	}
 
 	/** ABC to send a single network command in a separate Task thread
@@ -144,10 +145,12 @@ public class CarrieActivity extends Activity implements OnSharedPreferenceChange
 				response_code = httpConn.getResponseCode();
 			} catch (IOException e) {
 				status = CarrieActivity.Status.INTERNAL_ERROR;
+				Log.e(TAG, "Exception reading response code");
 				return;
 			}
 			if (response_code != HttpURLConnection.HTTP_OK) {
 				status = CarrieActivity.Status.SERVER_ERROR;
+				Log.e(TAG, "Server returned " + response_code);
 				return;
 			}
 			Log.i(TAG, "Got response code " + response_code);
@@ -197,7 +200,7 @@ public class CarrieActivity extends Activity implements OnSharedPreferenceChange
 		protected String statusString() {
 			switch(status) {
 			case NO_CONNECTION:
-				return "Cannot connect to server";
+				return "Cannot connect";
 			case INTERNAL_ERROR:
 				return "Internal error";
 			case TIMEOUT:
@@ -219,6 +222,7 @@ public class CarrieActivity extends Activity implements OnSharedPreferenceChange
 
 	private class GetServerNameTask extends HTTPTask {
 		protected Void doInBackground(String... url) {
+			Log.d(TAG, "GetServerNameTask.doInBackground");
 			String target = mPreferences.getString("server",null) +
 				":" +
 				mPreferences.getString("port", null);
@@ -337,7 +341,15 @@ public class CarrieActivity extends Activity implements OnSharedPreferenceChange
 					socket.connect(new InetSocketAddress(InetAddress.getByName(server), _port), _timeout);
 				} catch(IOException e) {
 					//Log.i(TAG, "    cannot connect");
+					try {
+						socket.close();
+					} catch(IOException e2) {
+					}
 					return;
+				}
+				try {
+					socket.close();
+				} catch(IOException e) {
 				}
 				Log.i(TAG, "    connection on " + server);
 				_task.callback(server);
@@ -382,28 +394,44 @@ public class CarrieActivity extends Activity implements OnSharedPreferenceChange
 				} catch(InterruptedException e) {
 				}
 			}
-			Log.i(TAG, "Threads dead, found " + mServers.size() + " servers");
+			Log.i(TAG, "Threads finished, found " + mServers.size() + " servers");
 			return mServers;
 		}
 
 		protected void onPostExecute(LinkedList<String> servers) {
+			Log.d(TAG, "ScanServersTask.onPostExecute");
 			setStatus("Found " + mServers.size() + " servers");
 			switch(mServers.size()) {
 			case 0:
 				return;
 			case 1:
-				SharedPreferences.Editor editor = mPreferences.edit();
-				editor.putString("server", mServers.getFirst());
-				editor.commit();
+				Log.d(TAG, "Updating preferences");
+				setServer(servers.getFirst());
 				return;
 			default:
 				AlertDialog.Builder alert = new AlertDialog.Builder(mActivity);
 				alert.setTitle("Choose server");
-				alert.setMessage("many - " + mServers.size());
+				//alert.setMessage("many - " + mServers.size());
+				//final LinkedList<String> inner_servers = servers;
+				final String[] inner_servers = new String[servers.size()];
+				servers.toArray(inner_servers);
+				alert.setItems(inner_servers,
+							   new DialogInterface.OnClickListener() {
+								   public void onClick(DialogInterface dialog, int item) {
+									   setServer(inner_servers[item]);
+								   }
+							   });
 				alert.show();
 				return;
 			}
 		}
+	}
+
+	public void setServer(String server) {
+		SharedPreferences.Editor editor = mPreferences.edit();
+		editor.putString("server", server);
+		editor.commit();
+		updateServerName();
 	}
 
 	public String getLocalIpAddress() {
@@ -524,15 +552,23 @@ public class CarrieActivity extends Activity implements OnSharedPreferenceChange
 	protected void onActivityResult(int requestCode,
 									int resultCode,
 									Intent data) {
-		Log.i(TAG, "activity result, request " + requestCode + " result " + resultCode);
-		if (requestCode == 1) { // change to check intent.scan = true
-			if (resultCode == RESULT_OK) {
+		//Log.i(TAG, "activity result, request " + requestCode + " result " + resultCode);
+		if (data == null) {
+			Log.i(TAG, "Preferences closed no scan requested");
+		} else {
+			Log.i(TAG, "Preferences closed scan is " + data.getBooleanExtra("scan", false));
+		}
+		// if (requestCode == 1) { // change to check intent.scan = true
+		// 	if (resultCode == RESULT_OK) {
 				// A contact was picked.  Here we will just display it
 				// to the user.
 				//				startActivity(new Intent(Intent.ACTION_VIEW, data));
-				Log.i(TAG, "Begin scan in correct thread");
-				new ScanServersTask(this).execute();
-			}
+		if (data != null && data.getBooleanExtra("scan", false) == true) {
+			Log.i(TAG, "Begin scan in correct thread");
+			new ScanServersTask(this).execute();
+		} else {
+			Log.d(TAG, "Updating server name");
+			updateServerName();
 		}
 	}
 
@@ -543,8 +579,8 @@ public class CarrieActivity extends Activity implements OnSharedPreferenceChange
 		// Change the labels showing how far jumps go
 		updateSkipLabels();
 		// Test the network connection
-		setStatus("Requesting server name");
-		new GetServerNameTask().execute();
+		//setStatus("Requesting server name");
+		//new GetServerNameTask().execute();
 	}
 
 	// public boolean onPreferenceClick (Preference preference) {
@@ -559,6 +595,12 @@ public class CarrieActivity extends Activity implements OnSharedPreferenceChange
 	// 		return false;
 	// 	}
 	// }
+
+	private void updateServerName() {
+		setStatus("Requesting server name");
+		Log.d(TAG, "Starting GetServerNameTask");
+		new GetServerNameTask().execute();
+	}
 
 	/** Update the window title bar to show server location
 	 **/

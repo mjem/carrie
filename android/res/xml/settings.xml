@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" android:title="@string/pref_title">
 	<PreferenceCategory android:summary="application settings" android:title="@string/pref_cat_scan">
-		<Preference android:key="scan" android:title="@string/pref_scan" android:summary="@string/version" />
+		<Preference android:key="scan" android:title="@string/pref_scan" android:summary="Look for local servers" />
 	</PreferenceCategory>
 
 	<PreferenceCategory android:summary="application settings" android:title="@string/pref_cat_connection">

@@ -2,8 +2,8 @@
 <resources>
 
 	<!-- misc -->
-	<string name="version">v0.2dev (b1)</string>
-	<string name="homepage">http://github/mjem</string>
+	<string name="version">v0.2dev</string>
+	<string name="homepage">http://github.com/mjem</string>
 	<string name="app_name">Carrie remote control</string>
 	<string name="title">Carrie remote control</string>
 	<string name="menu_options">Options</string>

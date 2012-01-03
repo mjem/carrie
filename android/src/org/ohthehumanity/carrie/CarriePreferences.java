@@ -7,6 +7,7 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.Preference;
 import android.util.Log;
+import android.net.Uri;
 import android.content.Intent;
 
 import org.ohthehumanity.carrie.R;
@@ -42,6 +43,8 @@ public class CarriePreferences extends PreferenceActivity implements OnPreferenc
 			return true;
 		} else if (preference == mHomepage) {
 			Log.i(TAG, "Open homepage");
+			startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.homepage))));
+
 			finish();
 			return true;
 		} else {

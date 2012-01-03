@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- 			  xmlns:repeat="http://schemas.android.com/apk/res/org.ohthehumanity.carrie"
+-->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical">
@@ -94,19 +97,43 @@
             android:text="@string/mute"
         	android:onClick="onMute" /> -->
 
-        <Button
+		 <org.ohthehumanity.carrie.AutoRepeatButton
+             xmlns:repeat="http://schemas.android.com/apk/res/org.ohthehumanity.carrie"
+             android:id="@+id/voldown"
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+             android:text="@string/voldown"
+             android:onClick="onVoldown"
+             repeat:initial_delay="1500"
+             repeat:repeat_interval="500"
+            />
+
+ <!--        <Button
             android:id="@+id/voldown"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/voldown"
-        	android:onClick="onVoldown" />
+        	android:onClick="onVoldown" /> -->
 
-        <Button
+		 <!--           android:layout_weight="1"
+            android:layout_margin="2dp" -->
+
+		 <org.ohthehumanity.carrie.AutoRepeatButton
+             xmlns:repeat="http://schemas.android.com/apk/res/org.ohthehumanity.carrie"
+             android:id="@+id/volup"
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+             android:text="@string/volup"
+             android:onClick="onVolup"
+             repeat:initial_delay="1500"
+             repeat:repeat_interval="500"
+            />
+<!--        <Button
             android:id="@+id/volup"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/volup"
-        	android:onClick="onVolup" />
+        	android:onClick="onVolup" /> -->
 	 </TableRow>
 
 	 <View
