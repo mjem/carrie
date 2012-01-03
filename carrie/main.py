@@ -128,6 +128,7 @@ def index():
 @app.route('/favicon.ico')
 def favicon():
 	"""Send static/favicon.png as a favicon"""
+	# url_for('static', filename='favicon.png')
 	return flask.send_file(os.path.join(os.path.dirname(__file__), 'static', 'favicon.png'),
 						   mimetype='image/png')
 
@@ -137,6 +138,23 @@ def hello():
 	"""Response to a ping from the Android application with the host name
 	(the client may have been configured with IP address only)."""
 	return socket.gethostname()
+
+@app.route('/android/application')
+def android_application():
+	"""Return the Android application"""
+	filename = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'android', 'bin', 'carrie.apk')
+	if os.path.exists(filename):
+		return flask.send_file(filename,
+							   attachment_filename='carrie.apk',
+							   as_attachment=True,
+							   mimetype='application/vnd.android.package-archive')
+	else:
+		return "not configured"
+
+@app.route('/android')
+def android():
+	return flask.render_template('android.html', name='carrie.apk', url=flask.url_for('android_application'))
+
 
 @app.route('/pause')
 def pause():

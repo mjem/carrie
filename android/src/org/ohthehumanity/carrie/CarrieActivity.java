@@ -85,12 +85,12 @@ public class CarrieActivity extends Activity implements OnSharedPreferenceChange
 		// set callback function when settings change
 		mPreferences.registerOnSharedPreferenceChangeListener(this);
 
-		Log.i(TAG,
-			  "Startup, server '" +
-			  mPreferences.getString("server","") +
-			  "' port " +
-			  mPreferences.getString("port", "") +
-			  " END");
+		// Log.i(TAG,
+		// 	  "Startup, server '" +
+		// 	  mPreferences.getString("server","") +
+		// 	  "' port " +
+		// 	  mPreferences.getString("port", "") +
+		// 	  " END");
 
 		if (mPreferences.getString("server", null) == null) {
 			setStatus("Server not set");
@@ -119,7 +119,7 @@ public class CarrieActivity extends Activity implements OnSharedPreferenceChange
 							break;
 
 						case DialogInterface.BUTTON_NEGATIVE:
-							Log.i(TAG, "Not opening wifi");
+							//Log.i(TAG, "Not opening wifi");
 							//No button clicked
 							break;
 						}
@@ -164,7 +164,7 @@ public class CarrieActivity extends Activity implements OnSharedPreferenceChange
 				status = CarrieActivity.Status.NO_CONNECTION;
 				return;
 			}
-			Log.i(TAG, "Opening URL " + request);
+			//Log.i(TAG, "Opening URL " + request);
 
 			HttpURLConnection httpConn = (HttpURLConnection) conn;
 			httpConn.setAllowUserInteraction(false);
@@ -178,30 +178,30 @@ public class CarrieActivity extends Activity implements OnSharedPreferenceChange
 			try {
 				httpConn.connect();
 			} catch (ConnectTimeoutException e) {
-				Log.i(TAG, "timeout");
+				//Log.i(TAG, "timeout");
 				status = CarrieActivity.Status.TIMEOUT;
 				return;
 			} catch (IOException e) {
-				Log.i(TAG, "ioexception");
+				//Log.i(TAG, "ioexception");
 				status = CarrieActivity.Status.NO_CONNECTION;
 				return;
 			}
-			Log.i(TAG, "Sending request");
+			//Log.i(TAG, "Sending request");
 
 			int response_code;
 			try {
 				response_code = httpConn.getResponseCode();
 			} catch (IOException e) {
 				status = CarrieActivity.Status.INTERNAL_ERROR;
-				Log.e(TAG, "Exception reading response code");
+				//Log.e(TAG, "Exception reading response code");
 				return;
 			}
 			if (response_code != HttpURLConnection.HTTP_OK) {
 				status = CarrieActivity.Status.SERVER_ERROR;
-				Log.e(TAG, "Server returned " + response_code);
+				//Log.e(TAG, "Server returned " + response_code);
 				return;
 			}
-			Log.i(TAG, "Got response code " + response_code);
+			//Log.i(TAG, "Got response code " + response_code);
 			InputStream in;
 			try {
 				in = httpConn.getInputStream();
@@ -230,7 +230,7 @@ public class CarrieActivity extends Activity implements OnSharedPreferenceChange
 				return;
 			}
 			status = CarrieActivity.Status.OK;
-			Log.i(TAG, "Server response was " + response);
+			//Log.i(TAG, "Server response was " + response);
 		}
 
 		protected String statusString() {
@@ -258,20 +258,20 @@ public class CarrieActivity extends Activity implements OnSharedPreferenceChange
 
 	private class GetServerNameTask extends HTTPTask {
 		protected Void doInBackground(String... url) {
-			Log.d(TAG, "GetServerNameTask.doInBackground");
+			//Log.d(TAG, "GetServerNameTask.doInBackground");
 			String target = mPreferences.getString("server",null) +
 				":" +
 				mPreferences.getString("port", null);
-			Log.i(TAG, "Calling retrieve");
+			//Log.i(TAG, "Calling retrieve");
 			retrieve("http://" +
 					 target +
 					 "/carrie/hello");
-			Log.i(TAG, "Done retrieve, status is " + status);
+			//Log.i(TAG, "Done retrieve, status is " + status);
 			return null;
 		}
 
 		protected void onPostExecute(Void dummy) {
-			Log.i(TAG, "GetServerName.onPostExecute");
+			//Log.i(TAG, "GetServerName.onPostExecute");
 			if (status == CarrieActivity.Status.OK) {
 				setStatus("Connected to " + response);
 				mServerName = response;
@@ -290,14 +290,14 @@ public class CarrieActivity extends Activity implements OnSharedPreferenceChange
 			String target = mPreferences.getString("server", null) +
 				":" +
 				mPreferences.getString("port", null);
-			Log.i(TAG, "Calling retrieve");
+			//Log.i(TAG, "Calling retrieve");
 			retrieve("http://" + target + "/" + url[0]);
-			Log.i(TAG, "Done retrieve, status is " + status);
+			//Log.i(TAG, "Done retrieve, status is " + status);
 			return null;
 		}
 
 		protected void onPostExecute(Void dummy) {
-			Log.i(TAG, "onPostExecute");
+			//Log.i(TAG, "onPostExecute");
 			if (status == CarrieActivity.Status.OK) {
 				setStatus(response);
 			} else {
@@ -350,7 +350,7 @@ public class CarrieActivity extends Activity implements OnSharedPreferenceChange
 					socket.close();
 				} catch(IOException e) {
 				}
-				Log.i(TAG, "    connection on " + server);
+				//Log.i(TAG, "    connection on " + server);
 				mTask.callback(server);
 			}
 		}
@@ -360,7 +360,7 @@ public class CarrieActivity extends Activity implements OnSharedPreferenceChange
 		 **/
 
 		public void callback(String addr) {
-			Log.i(TAG, "Callback " + addr);
+			//Log.i(TAG, "Callback " + addr);
 			//publishProgress(addr);
 			synchronized(this) {
 				mServers.add(addr);
@@ -390,11 +390,11 @@ public class CarrieActivity extends Activity implements OnSharedPreferenceChange
 			String full_ip = getLocalIpAddress();
 			int index = full_ip.lastIndexOf(".");
 			if (index == -1) {
-				Log.e(TAG, "Cannot decode IP " + full_ip);
+				//Log.e(TAG, "Cannot decode IP " + full_ip);
 				return mServers;
 			}
 			String subnet = full_ip.substring(0, index + 1);
-			Log.i(TAG, "Begin scan of " + subnet);
+			//Log.i(TAG, "Begin scan of " + subnet);
 			setStatus("Scanning " + subnet + "* ...");
 			int timeout = 500; // ms
 			int port = Integer.parseInt(mPreferences.getString("port", null));
@@ -404,14 +404,14 @@ public class CarrieActivity extends Activity implements OnSharedPreferenceChange
 				scanners.add(t);
 				t.start();
 			}
-			Log.i(TAG, "End scan initiation, waiting for threads to exit");
+			//Log.i(TAG, "End scan initiation, waiting for threads to exit");
 			for(Iterator<Scanner> i = scanners.iterator(); i.hasNext(); ) {
 				try {
 					i.next().join();
 				} catch(InterruptedException e) {
 				}
 			}
-			Log.i(TAG, "Threads finished, found " + mServers.size() + " servers");
+			//Log.i(TAG, "Threads finished, found " + mServers.size() + " servers");
 			return mServers;
 		}
 
@@ -419,7 +419,7 @@ public class CarrieActivity extends Activity implements OnSharedPreferenceChange
 		 **/
 
 		protected void onPostExecute(LinkedList<String> servers) {
-			Log.d(TAG, "ScanServersTask.onPostExecute");
+			//Log.d(TAG, "ScanServersTask.onPostExecute");
 			setStatus("Found " + mServers.size() + " servers");
 			switch(mServers.size()) {
 			case 0:
@@ -427,7 +427,7 @@ public class CarrieActivity extends Activity implements OnSharedPreferenceChange
 				return;
 			case 1:
 				// single server found, automatically connect
-				Log.d(TAG, "Updating preferences");
+				//Log.d(TAG, "Updating preferences");
 				setServer(servers.getFirst());
 				return;
 			default:
@@ -475,7 +475,7 @@ public class CarrieActivity extends Activity implements OnSharedPreferenceChange
 				}
 			}
 		} catch (SocketException ex) {
-			Log.e(TAG, ex.toString());
+			//Log.e(TAG, ex.toString());
 		}
 		return "";
 	}
@@ -486,7 +486,7 @@ public class CarrieActivity extends Activity implements OnSharedPreferenceChange
 	public void setStatus(String message) {
 		TextView updateView = (TextView) findViewById(R.id.status);
 		if (updateView == null) {
-			Log.e(TAG, "R.id.status is null");
+			//Log.e(TAG, "R.id.status is null");
 		} else {
 			updateView.setText(message);
 		}
@@ -500,7 +500,7 @@ public class CarrieActivity extends Activity implements OnSharedPreferenceChange
 			mPreferences.getString("port", null) == null) {
 			startActivity(new Intent(this, CarriePreferences.class));
 		} else {
-			Log.i(TAG, "command");
+			//Log.i(TAG, "command");
 			setStatus("Connecting...");
 			new SendCommandTask().execute(message);
 		}
@@ -511,7 +511,7 @@ public class CarrieActivity extends Activity implements OnSharedPreferenceChange
 
 	public void onPlay(View view) {
 		setStatus("on play");
-		Log.i(TAG, "onPlay");
+		//Log.i(TAG, "onPlay");
 		//String res = send("play");
 		command("pause");
 	}
@@ -581,7 +581,7 @@ public class CarrieActivity extends Activity implements OnSharedPreferenceChange
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		Log.i(TAG, "onCreateOptionsMenu");
+		//Log.i(TAG, "onCreateOptionsMenu");
 		//startActivity(new Intent(this, CarriePreferences.class));
 		startActivityForResult(new Intent(this, CarriePreferences.class), 1);
 		return false;
@@ -593,17 +593,17 @@ public class CarrieActivity extends Activity implements OnSharedPreferenceChange
 	protected void onActivityResult(int requestCode,
 									int resultCode,
 									Intent data) {
-		if (data == null) {
-			Log.i(TAG, "Preferences closed no scan requested");
-		} else {
-			Log.i(TAG, "Preferences closed scan is " + data.getBooleanExtra("scan", false));
-		}
+		//if (data == null) {
+			//Log.i(TAG, "Preferences closed no scan requested");
+		//} else {
+		//Log.i(TAG, "Preferences closed scan is " + data.getBooleanExtra("scan", false));
+		//}
 
 		if (data != null && data.getBooleanExtra("scan", false) == true) {
-			Log.i(TAG, "Begin scan in correct thread");
+			//Log.i(TAG, "Begin scan in correct thread");
 			new ScanServersTask(this).execute();
 		} else {
-			Log.d(TAG, "Updating server name");
+			//Log.d(TAG, "Updating server name");
 			updateServerName();
 		}
 	}
@@ -628,7 +628,7 @@ public class CarrieActivity extends Activity implements OnSharedPreferenceChange
 
 	private void updateServerName() {
 		setStatus("Requesting server name");
-		Log.d(TAG, "Starting GetServerNameTask");
+		//Log.d(TAG, "Starting GetServerNameTask");
 		new GetServerNameTask().execute();
 	}
 
@@ -636,6 +636,7 @@ public class CarrieActivity extends Activity implements OnSharedPreferenceChange
 	 **/
 
 	private void updateTitle() {
+		// vvv
 		String prelude = "Remote Control - ";
 		if (mPreferences.getString("server", null) == null) {
 			setTitle(prelude + "server not set");

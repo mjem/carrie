@@ -49,16 +49,16 @@ public class CarriePreferences extends PreferenceActivity implements OnPreferenc
     }
 
 	public boolean onPreferenceClick (Preference preference) {
-		Log.i(TAG, "onPreferencesClick " + preference.getTitle());
+		//Log.i(TAG, "onPreferencesClick " + preference.getTitle());
 		if (preference ==mScan) {
-			Log.i(TAG, "Scan request");
+			//Log.i(TAG, "Scan request");
 			Intent i = new Intent();
 			i.putExtra("scan", true);
 			setResult(RESULT_OK, i);
 			finish();
 			return true;
 		} else if (preference == mHomepage) {
-			Log.i(TAG, "Open homepage");
+			//Log.i(TAG, "Open homepage");
 			startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.homepage))));
 
 			finish();
