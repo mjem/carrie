@@ -1,3 +1,8 @@
 include distribute_setup.py
 include README.md
 include carrie/static/*.js
+include carrie/static/*.css
+include carrie/static/jquery-ui/css/smoothness/*.css
+include carrie/static/jquery-ui/css/smoothness/images/*.png
+include carrie/static/jquery-ui/js/*.js
+include carrie/templates/*.html

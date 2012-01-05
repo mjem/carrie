@@ -34,11 +34,16 @@ setup(
     author_email='mike.elson@gmail.com',
     url='http://github.com/mjem/carrie',
     description='Remote control of media players via web or Android phone',
-	license='GPLv3',
+	license='GPL',
 	# license="GPLv3",
 	keywords="mplayer youtube iplayer android",
 	packages=['carrie'],
-	scripts=['bin/carrie'],
+	#scripts=['bin/carrie'],
+	entry_points={
+		'console_scripts': [
+			'carrie=carrie.cmd:carrie_main',
+			'stop-screensaver=carrie.cmd:stop_screensaver_main',
+			]},
     # packages=find_packages(exclude="example_project"),
     # zip_safe=False,
     install_requires=[
@@ -52,8 +57,16 @@ setup(
 	# test_suite='sentry.runtests.runtests',
 	#include_package_data=True,
 	package_dir={'carrie': 'carrie'},
-	package_data={'carrie': ['static/*.js', 'static/*.css']},
-	data_files=[('carrie/static', ['index.js'])], 
+	# this doesn't seem to work, use MANIFEST.in instead
+	# Files go into MANIFEST.in to get them in the distribution archives,
+	# package_data to get them installed
+	package_data={'carrie': ['static/*.js',
+							 'static/*.css',
+							 'templates/*.html',
+							 'static/jquery-ui/js/*.js',
+							 'static/jquery-ui/css/smoothness/*.css',
+							 'static/jquery-ui/css/smoothness/images/*.png']},
+	#data_files=[('carrie/static', ['index.js'])],
 	long_description=read('README.md'),
 	# 			  entry_points = {
     #     'console_scripts': [
@@ -67,7 +80,7 @@ setup(
     classifiers=[
         'Framework :: Django',
         'Topic :: Software Development',
-		"License :: OSI Approved :: GPLv3 License",
+		'License :: OSI Approved :: GNU General Public License (GPL)',
 		"Intended Audience :: End Users/Desktop",
 		"Operating System :: POSIX :: Linux",
 		"Programming Language :: Python :: 2.7",

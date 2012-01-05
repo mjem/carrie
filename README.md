@@ -1,5 +1,3 @@
-<!-- -*- mode: markdown -*- -->
-
 Carrie Remote Control
 =====================
 
@@ -14,18 +12,18 @@ The players supported are:
 - BBC iPlayer on Firefox or Chromium.
 - mplayer
 
-This project is not a media center. There is no functionality for starting media playback or changing the file being played. `carrie` is used to control a video which is already playing. The default functions available are:
+This project is not a media center. There is no function to start media playback or change the file being played. `carrie` is used only to control a video which is already playing. The functions available are:
 
 - Play/pause
 - Toggle full screen
 - Volume up annd down
 - Mute
 
-If the client player is `mplayer` these additional functions are available:
+If the client player is `mplayer` then these additional functions are available:
 
 - Skip forwards/backwards
 - Toggle fullscreen, OSD, subtitle visibility
-- Change subtitle language.
+- Change audio and subtitle languages.
 
 Screenshots
 -----------
@@ -49,10 +47,10 @@ License
 
 The server and application are licensed under the GPLv3.
 
-Why not just use x/y/z remote control instead of this?
-------------------------------------------------------
+Why use this and not another remote control?
+--------------------------------------------
 
-There are other remote controls for Android devices. `carrie` is for users who already have another method they use to start media playback, and just want to add a remote function.
+There are other remote controls for Android devices with more functions. `carrie` is for users who already have a method they use to start media playback, and just want to add some remote functions.
 
 Other remote controls I would recommend are:
 
@@ -62,10 +60,8 @@ Other remote controls I would recommend are:
 Minor features
 --------------
 
-Just because they all had to be compiled in...
-
 - To test the server connection press MENU then BACK
-- Volume up/down have auto repeat
+- Volume up/down buttons on the Android application have auto repeat
 - If multiple flash windows are found the one nearest the front is used
 
 Requirements
@@ -84,25 +80,62 @@ To control the server:
 
 To use the mobile phone applet:
 
-- Android device running Android Froyo or later
+- Android device running Android Froyo (2.1) or later
 
 Server installation
 -------------------
 
-First install the server:
+First a standard install of the server software::
 
-    > git clone xxx
-    > cd xxx
+    > pip install carrie
+
+or from source::
+
     > python setup.py build
     > sudo python setup.py install
 
-To configure `mplayer` edit `$HOME/.mplayer/config` and add this line:
+without root access::
+
+    > python setup.py build
+    > virtualenv $HOME/carrie-env
+    > . $HOME/carrie-env/bin/activate
+    > python setup.py install
+
+To configure `mplayer` to accept commands over a FIFO, edit `$HOME/.mplayer/config` and add this line::
 
     input=file=/tmp/mplayer.fifo
 
-Any new instances of mplayer will connect to the FIFO and listen to commands. This doesn't affect normal mplayer usage. The FIFO will be created when the server starts up, or maually with:
+Any new instances of mplayer will connect to the FIFO and listen to commands. This doesn't affect normal mplayer usage. The FIFO will be created by `carrie` on startup, or maually with::
 
     > mkfifo /tmp/mplayer.fifo
+
+Start the server
+----------------
+
+Run::
+
+    > carrie
+
+This will start up the server, running in the foreground, listening on port 5505, using a FIFO on /tmp/mplayer.fif to communicate with mplayer. The FIFO will be created if it doesn't already exist.
+
+Run::
+
+    > carrie -h
+
+to see available options.
+
+To run in the background detached from the terminal use::
+
+    > nohup carrie 2>&1 > /dev/null &
+
+Control via browser
+-------------------
+
+Open a web browser and visit::
+
+    http://<server>:5505
+
+For controlling Flash video this should be done from a different window, or different computer, from the screen showing the video. It is not possible to control videos on one tab from a different tab.
 
 Android application installation
 --------------------------------
@@ -112,63 +145,19 @@ This project includes the Android application source in the `android` directory 
 - INTERNET: to make connections to the server
 - ACCESS_NETWORK_STATE: to test if wifi is active on startup
 
-Start the server
-----------------
-
-Run:
-
-    > carrie
-
-This will start up the server, running in the foreground, listening on port 5505, using a FIFO on /tmp/mplayer.fif to communicate with mplayer. The FIFO will be created if it doesn't already exist.
-
-Run:
-
-    > carrie -h
-
-to see available options.
-
-To run in the background use:
-
-    > nohup carrie 2>&1 > /dev/null &
-
-Control via browser
--------------------
-
-Open a web browser and visit: "http://<server>:5505"
+The source and a precompiled binary are in the `GitHub project <http://github.com/mjem/carrie>`_.
 
 Control from Android device
 ---------------------------
 
-Install the Android application, either by compiling from source or using the precompiled `carrie.apk` from this repository. Press the MENU button and enter the name or IP address or the media player. 
+Install the Android application, either by compiling from source or using the precompiled `carrie.apk` from the GitHub repository. Press the MENU button and enter the name or IP address or the media player. 
 
-The application it requires the Android "Internet Access" permission because it needs to connect to the server.
+The application requires the Android "Internet Access" permission because it needs to connect to the server.
 
-Development - server
---------------------
-
-May wish to install:
-
-- python-pip
-- python-distribute
-
-Development - Android application
----------------------------------
-
-On Debian install: android sdk (manually), ant, openjdk-6-jdk, optionally Eclipse.
-
-Compiling and installing the code should be the same as a standard Android application - either use Eclipse, or command line tools.
-
-Directory layout
+Changes and news
 ----------------
 
-- android/
-  Android controller application
-- carrie/
-  Python HTTP server code
-- bin/
-  Startup script
-- README.md
-  This file
-- doc/
-  Some screenshots
-  
+0.2 (2012-01-05)
+~~~~~~~~~~~~~~~~
+
+ * Initial pypi release
