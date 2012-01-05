@@ -20,30 +20,36 @@
 Supplies a web site index page and dispatches media commands.
 """
 
-import os
 import socket
 import logging
+import pkg_resources
 
 import flask
 import werkzeug
 
 from carrie import xorg
 from carrie import fifo
+from carrie import __version__
+
+PACKAGE = 'carrie'
 
 app = flask.Flask(__name__)
+
+# filename = resource_filename(Requirement.parse("MyProject"),"sample.conf")
+# version=pkg_resources.require('carrie')[0].version)
 
 
 @app.route('/')
 def index():
 	"""Send main index page template to browser."""
-	return flask.render_template('index.html')
+	return flask.render_template('index.html',
+								 about_url=flask.url_for('about'))
 
 
 @app.route('/favicon.ico')
 def favicon():
 	"""Send static/favicon.png as a favicon"""
-	# url_for('static', filename='favicon.png')
-	return flask.send_file(os.path.join(os.path.dirname(__file__), 'static', 'favicon.png'),
+	return flask.send_file(pkg_resources.resource_stream(PACKAGE, 'static/favicon.png'),
 						   mimetype='image/png')
 
 
@@ -54,26 +60,30 @@ def hello():
 	return socket.gethostname()
 
 
-@app.route('/android/application')
-def android_application():
+@app.route('/application')
+def application():
 	"""Return the Android application"""
-	filename = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'android', 'bin', 'carrie.apk')
-	if os.path.exists(filename):
-		return flask.send_file(filename,
-							   attachment_filename='carrie.apk',
-							   as_attachment=True,
-							   mimetype='application/vnd.android.package-archive')
-	else:
-		return "not configured"
+	return flask.send_file(pkg_resources.resource_stream(PACKAGE, 'static/carrie.apk'),
+						   attachment_filename='carrie.apk',
+						   as_attachment=True,
+						   mimetype='application/vnd.android.package-archive')
 
 
-@app.route('/android')
-def android():
+@app.route('/about')
+def about():
 	"""Send the browser a page with a link to download the Android application."""
 
-	return flask.render_template('android.html',
-								 name='carrie.apk',
-								 url=flask.url_for('android_application'))
+	if pkg_resources.resource_exists(PACKAGE, 'static/carrie.apk'):
+		return flask.render_template('about.html',
+									 application_name='carrie.apk',
+									 application_url=flask.url_for('application'),
+									 back_url=flask.url_for('index'),
+									 version=__version__)
+
+	else:
+		return flask.render_template('about.html',
+									 back_url=flask.url_for('index'),
+									 version=__version__)
 
 
 @app.route('/pause')
@@ -191,8 +201,9 @@ def serve_forever(port, debug):
 	in the program's environment.
 	"""
 
-	# print 'static ', os.path.join(os.path.dirname(__file__), 'static')
+	# app.wsgi_app = werkzeug.SharedDataMiddleware(app.wsgi_app, {
+	# 		'/static': os.path.join(os.path.dirname(__file__), 'static')})
 	app.wsgi_app = werkzeug.SharedDataMiddleware(app.wsgi_app, {
-			'/static': os.path.join(os.path.dirname(__file__), 'static')})
+			'/static': (PACKAGE, 'static')})
 
 	app.run(host='0.0.0.0', port=port, debug=debug)

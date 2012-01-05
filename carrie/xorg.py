@@ -282,6 +282,7 @@ def find_flash_windows():
 
 
 def find_top_flash_window():
+	"""Return info about furthest forward window with flash video playing"""
 	flashes = find_flash_windows()
 
 	have_fs = False

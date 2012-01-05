@@ -2,7 +2,6 @@
 <resources>
 
 	<!-- misc -->
-	<string name="version">v0.2</string>
 	<string name="homepage">http://github.com/mjem</string>
 	<string name="app_name">Carrie remote control</string>
 	<string name="title">Carrie remote control</string>
@@ -26,6 +25,10 @@
 
 	<!-- application labels -->
 	<string name="pause">Pause/play</string>
+	<string name="backward">Backward</string>
+	<string name="forward">Forward</string>
+	<string name="bbackward">Skip back</string>
+	<string name="fforward">Skip forward</string>
 	<string name="mute">Mute</string>
 	<string name="voldown">Volume down</string>
 	<string name="volup">Volume up</string>

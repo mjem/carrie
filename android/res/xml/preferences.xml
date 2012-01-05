@@ -15,7 +15,7 @@
 	</PreferenceCategory>
 
 	<PreferenceCategory android:title="@string/pref_cat_about">
-		<Preference android:title="@string/pref_about_name" android:summary="@string/version" />
+		<Preference android:key="version" android:title="@string/pref_about_name" android:summary="" />
 		<Preference android:key="homepage" android:title="@string/pref_about_homepage" android:summary="@string/homepage" />
 	</PreferenceCategory>
 </PreferenceScreen>

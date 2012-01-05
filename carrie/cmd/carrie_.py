@@ -28,15 +28,8 @@ from carrie import server
 DEFAULT_FIFO = '/tmp/mplayer.fifo'
 DEFAULT_PORT = 5505
 
-# from pkg_resources import Requirement, resource_filename
-# filename = resource_filename(Requirement.parse("MyProject"),"sample.conf")
 
-
-if __name__ == '__main__':
-	carrie_main()
-
-
-def carrie_main():
+def main():
 	"""Entry point to `carrie` command line tool."""
 
 	# <program>  Copyright (C) <year>  <name of author>
@@ -54,19 +47,10 @@ def carrie_main():
 						type=int,
 						default=DEFAULT_PORT,
 						help='HTTP port to listen on')
-	# parser.add_argument('--create-fifo', '-c',
-						# action='store_true',
-						# help='Create FIFO if it does not already exist')
-	parser.add_argument('--stop-xscreensaver',
-						action='store_true')
-	parser.add_argument('--delay',
-						type=int,
-						help=('Number of seconds between mouse nudges if --stop-xscreensaver is '
-							  'used'))
 	parser.add_argument('--logfile',
 						metavar='LOG',
 						help='Log to LOG instead of stdout')
-	parser.add_argument('--debug',
+	parser.add_argument('--debug', '-d',
 						action='store_true',
 						help='Use flask debug mode')
 	args = parser.parse_args()
@@ -83,17 +67,5 @@ def carrie_main():
 	# Listen for HTTP connections
 	server.serve_forever(args.port, args.debug)
 
-
-def stop_screensaver_main():
-	"""Entry point to `stop-screensaver` command line tool."""
-
-	parser = argparse.ArgumentParser(
-		description='Disable X screensavers by periodically sending small mouse movements')
-	args = parser.parse_args()
-		# Spawn a separate thread for the screensaver stopper
-	# if args.stop_xscreensaver:
-	# 	stop_xscreensaver = xscreensaver.StopXScreensaver(180)
-	# 	logging.debug('Starting thead')
-	# 	stop_xscreensaver.deamon = True
-	# 	stop_xscreensaver.start()
-	# 	logging.debug('main')
+if __name__ == '__main__':
+	main()

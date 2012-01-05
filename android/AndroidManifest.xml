@@ -19,8 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.ohthehumanity.carrie"
-    android:versionCode="1"
-    android:versionName="0.2" >
+    android:versionCode="2"
+    android:versionName="0.3" >
 
   <!-- SDK 7 not supported you get errors like:
 Error: String types not allowed (at layout_height with value 'match_parent')

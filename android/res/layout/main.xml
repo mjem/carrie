@@ -35,7 +35,7 @@
 				android:id="@+id/backwards"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				android:text="Backward"
+				android:text="@string/backward"
         		android:onClick="onBackwards" />
 
 	        <TextView
@@ -49,7 +49,7 @@
 				android:id="@+id/forwards"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				android:text="Forward"
+				android:text="@string/forward"
         		android:onClick="onForwards" />
 
 		</TableRow>
@@ -60,7 +60,7 @@
             android:id="@+id/bbackwards"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Skip back"
+            android:text="@string/bbackward"
         	android:onClick="onBBackwards" />
 
 		<TextView
@@ -74,7 +74,7 @@
             android:id="@+id/fforwards"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Skip forward"
+            android:text="@string/fforward"
         	android:onClick="onFForwards" />
 
     </TableRow>

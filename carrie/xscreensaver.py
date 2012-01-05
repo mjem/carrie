@@ -1,8 +1,13 @@
 #!/usr/bin/env python
 
+"""Stop screen saver from kicking in."""
+
+import time
+import logging
 import threading
 
 from carrie import xorg
+
 
 class StopXScreensaver(threading.Thread):
 	"""Called in a separate process. Moves the mouse pointer a pixel left or right

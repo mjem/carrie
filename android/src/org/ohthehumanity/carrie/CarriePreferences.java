@@ -17,14 +17,17 @@
 package org.ohthehumanity.carrie;
 
 import android.os.Bundle;
-import android.preference.PreferenceActivity;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
-import android.preference.Preference.OnPreferenceClickListener;
-import android.preference.Preference;
-import android.util.Log;
 import android.net.Uri;
+import android.util.Log;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.widget.TextView;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import android.preference.PreferenceActivity;
+import android.preference.Preference;
+import android.preference.Preference.OnPreferenceClickListener;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 
 import org.ohthehumanity.carrie.R;
 
@@ -40,12 +43,21 @@ public class CarriePreferences extends PreferenceActivity implements OnPreferenc
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            addPreferencesFromResource(R.xml.settings);
-			mScan = findPreference("scan");
-			mScan.setOnPreferenceClickListener(this);
-			mHomepage = findPreference("homepage");
-			mHomepage.setOnPreferenceClickListener(this);
+		super.onCreate(savedInstanceState);
+		addPreferencesFromResource(R.xml.preferences);
+
+		Preference versionWidget = findPreference("version");
+		try {
+			PackageInfo pkgInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+			versionWidget.setSummary("v" + pkgInfo.versionName);
+		} catch (PackageManager.NameNotFoundException e) {
+			versionWidget.setSummary("unknown");
+		}
+
+		mScan = findPreference("scan");
+		mScan.setOnPreferenceClickListener(this);
+		mHomepage = findPreference("homepage");
+		mHomepage.setOnPreferenceClickListener(this);
     }
 
 	public boolean onPreferenceClick (Preference preference) {

@@ -4,8 +4,12 @@
 (public domain)
 """
 
-import sys, os, time, atexit
+import sys
+import os
+import time
+import atexit
 from signal import SIGTERM
+
 
 class Daemon(object):
 	"""A generic daemon class.
@@ -32,8 +36,8 @@ class Daemon(object):
 				# exit first parent
 				sys.exit(0)
 		except OSError, e:
-				sys.stderr.write("fork #1 failed: %d (%s)\n" % (e.errno, e.strerror))
-				sys.exit(1)
+			sys.stderr.write("fork #1 failed: %d (%s)\n" % (e.errno, e.strerror))
+			sys.exit(1)
 
 		# decouple from parent environment
 		# os.chdir("/")
@@ -65,9 +69,10 @@ class Daemon(object):
 		# write pidfile
 		atexit.register(self.delpid)
 		pid = str(os.getpid())
-		file(self.pidfile,'w+').write("%s\n" % pid)
+		file(self.pidfile, 'w+').write("%s\n" % pid)
 
 	def delpid(self):
+		"""Remove PID file"""
 		os.remove(self.pidfile)
 
 	def start(self):
@@ -75,7 +80,7 @@ class Daemon(object):
 
 		# Check for a pidfile to see if the daemon already runs
 		try:
-			pf = file(self.pidfile,'r')
+			pf = file(self.pidfile, 'r')
 			pid = int(pf.read().strip())
 			pf.close()
 
@@ -96,7 +101,7 @@ class Daemon(object):
 
 		# Get the pid from the pidfile
 		try:
-			pf = file(self.pidfile,'r')
+			pf = file(self.pidfile, 'r')
 			pid = int(pf.read().strip())
 			pf.close()
 
@@ -106,7 +111,7 @@ class Daemon(object):
 		if not pid:
 			message = "pidfile %s does not exist. Daemon not running?\n"
 			sys.stderr.write(message % self.pidfile)
-			return # not an error in a restart
+			return  # not an error in a restart
 
 		# Try killing the daemon process
 		try:

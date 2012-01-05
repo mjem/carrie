@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+"""Initialise Python standard library logging module"""
+
 import logging
 import logging.config
 
@@ -40,7 +42,9 @@ LOGGING = {
 				},
 		}
 
+
 def init_log(filename=None):
+	"""Initialise log file"""
 	if filename is not None:
 		LOGGING['handlers']['file'] = {'class': 'logging.FileHandler',
 									   'filename': filename,

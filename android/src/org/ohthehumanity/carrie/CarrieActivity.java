@@ -85,13 +85,6 @@ public class CarrieActivity extends Activity implements OnSharedPreferenceChange
 		// set callback function when settings change
 		mPreferences.registerOnSharedPreferenceChangeListener(this);
 
-		// Log.i(TAG,
-		// 	  "Startup, server '" +
-		// 	  mPreferences.getString("server","") +
-		// 	  "' port " +
-		// 	  mPreferences.getString("port", "") +
-		// 	  " END");
-
 		if (mPreferences.getString("server", null) == null) {
 			setStatus("Server not set");
 		} else if (mPreferences.getString("port", null) == null) {
@@ -112,7 +105,8 @@ public class CarrieActivity extends Activity implements OnSharedPreferenceChange
 							//Yes button clicked
 							final Intent intent = new Intent(Intent.ACTION_MAIN, null);
 							intent.addCategory(Intent.CATEGORY_LAUNCHER);
-							final ComponentName cn = new ComponentName("com.android.settings", "com.android.settings.wifi.WifiSettings");
+							final ComponentName cn = new ComponentName("com.android.settings",
+																	   "com.android.settings.wifi.WifiSettings");
 							intent.setComponent(cn);
 							intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 							startActivity( intent);
@@ -627,9 +621,12 @@ public class CarrieActivity extends Activity implements OnSharedPreferenceChange
 	 **/
 
 	private void updateServerName() {
-		setStatus("Requesting server name");
-		//Log.d(TAG, "Starting GetServerNameTask");
-		new GetServerNameTask().execute();
+		if (mPreferences.getString("server", null) == null) {
+			setStatus("Server not set");
+		} else {
+			setStatus("Requesting server name");
+			new GetServerNameTask().execute();
+		}
 	}
 
 	/** Update the window title bar to show server location

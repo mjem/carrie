@@ -1,5 +1,4 @@
 carrie.org
-setup.sh
 android/local.properties
 android/.classpath
 android/.project
@@ -17,3 +16,4 @@ build
 env
 README.html
 android/carrie.keystore
+bin

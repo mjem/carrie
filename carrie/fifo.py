@@ -128,4 +128,3 @@ class Console(object):
 			command = raw_input('> ')
 			#print
 			driver.send(command)
-

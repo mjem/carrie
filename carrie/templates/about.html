@@ -1,0 +1,14 @@
+<html>
+  <head>
+    <title>About Carrie remote control</title>
+    <link rel="stylesheet" type="text/css" href="static/carrie.css"></link>
+  </head>
+  <body>
+    <h1>About Carrie remote control</h1>
+	<p>Version: {{version}}</p>
+	<p>Control YouTube and BBC iPlayer Flash controls in other pages, or control mplayer playback,
+	  and set system volume level.</p>
+	{%if application_url%}<p><a href="{{application_url}}">{{application_name}}</a></p>{%endif%}
+	<p><a href='{{back_url}}'>Back</a></p>
+  </body>
+</html>
