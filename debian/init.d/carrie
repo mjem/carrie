@@ -1,0 +1,59 @@
+#!/bin/sh
+#
+# start/stop carrie server.
+
+### BEGIN INIT INFO
+# Provides:          carrie
+# Required-Start:    $network $local_fs
+# Required-Stop:     $network $local_fs
+# Default-Start:     S 2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Carrie server
+# Description:       Control media players
+### END INIT INFO
+
+# test -f /sbin/portmap || exit 0
+
+. /lib/lsb/init-functions
+
+OPTIONS=""
+if [ -f /etc/default/carrie ]; then
+  . /etc/default/carrie
+fi
+
+case "$1" in
+    start)
+	log_begin_msg "Starting carrie server..."
+	pid=$( pidofproc -p /var/run/carrie.pid /usr/local/bin/carrie )
+	if [ -n "$pid" ] ; then
+	      log_begin_msg "Already running."
+	      log_end_msg 0
+	      exit 0
+	fi
+	start-stop-daemon --start --quiet --oknodo --exec /usr/local/bin/carrie --background --make-pidfile --pidfile /var/run/carrie.pid -- $OPTIONS
+	log_end_msg $?
+
+	;;
+    stop)
+	log_begin_msg "Stopping carrie server..."
+	start-stop-daemon --stop --quiet --oknodo --exec /usr/bin/python --pidfile /var/run/carrie.pid
+	log_end_msg $?
+	;;
+    force-reload)
+	$0 restart
+	;;
+    restart)
+	$0 stop
+	$0 start
+	;;
+    status)
+	status_of_proc -p /var/run/carrie.pid /usr/bin/python carrie && exit 0 || exit $?
+	;;
+    *)
+	log_success_msg "Usage: /etc/init.d/carrie {start|stop|force-reload|restart|status}"
+	exit 1
+	;;
+esac
+
+exit 0
+

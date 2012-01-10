@@ -1,0 +1,59 @@
+#!/bin/sh
+#
+# start/stop stop-screensaver server.
+
+### BEGIN INIT INFO
+# Provides:          stop-screensaver
+# Required-Start:    $network $local_fs
+# Required-Stop:     $network $local_fs
+# Default-Start:     S 2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Stop X screensaver
+# Description:       Stop X screensaver from kicking in by sending fake mouse events
+### END INIT INFO
+
+# test -f /sbin/portmap || exit 0
+
+. /lib/lsb/init-functions
+
+OPTIONS=""
+if [ -f /etc/default/stop-screensaver ]; then
+  . /etc/default/stop-screensaver
+fi
+
+case "$1" in
+    start)
+	log_begin_msg "Starting stop-screensaver..."
+	pid=$( pidofproc -p /var/run/stop-screensaver.pid /usr/local/bin/stop-screensaver )
+	if [ -n "$pid" ] ; then
+	      log_begin_msg "Already running."
+	      log_end_msg 0
+	      exit 0
+	fi
+	start-stop-daemon --start --quiet --oknodo --exec /usr/local/bin/stop-screensaver --background --make-pidfile --pidfile /var/run/stop-screensaver.pid -- $OPTIONS
+	log_end_msg $?
+
+	;;
+    stop)
+	log_begin_msg "Stopping stop-screensaver..."
+	start-stop-daemon --stop --quiet --oknodo --exec /usr/bin/python --pidfile /var/run/stop-screensaver.pid
+	log_end_msg $?
+	;;
+    force-reload)
+	$0 restart
+	;;
+    restart)
+	$0 stop
+	$0 start
+	;;
+    status)
+	status_of_proc -p /var/run/stop-screensaver.pid /usr/bin/python stop-screensaver && exit 0 || exit $?
+	;;
+    *)
+	log_success_msg "Usage: /etc/init.d/stop-screensaver {start|stop|force-reload|restart|status}"
+	exit 1
+	;;
+esac
+
+exit 0
+
