@@ -23,6 +23,8 @@ import os
 import stat
 import logging
 
+DEFAULT_FIFO = '/tmp/mplayer.fifo'
+
 driver = None
 
 
@@ -45,6 +47,8 @@ class SlaveDriver(object):
 	def send(self, message):
 		"""Send text command `message` over the FIFO. Raises an exception if the FIFO
 		does not exist or there is no client on the other end."""
+
+		logging.info('fifo sending ' + message)
 
 		if self.fifo is None:
 			logging.debug('Opening FIFO ' + self.fifo_filename)
@@ -104,9 +108,12 @@ def create_fifo(filename):
 		os.mkfifo(filename)
 
 
-def init_fifo(filename):
+def init_fifo(filename=None):
 	"""Create fifo object if needed and create a module SlaveDriver object.
 	"""
+
+	if filename is None:
+		filename = DEFAULT_FIFO
 
 	global driver
 

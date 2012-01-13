@@ -28,7 +28,7 @@ setup(
     description='Remote control of media players via web or Android phone',
 	license='GPL',
 	keywords="mplayer youtube iplayer android",
-	packages=['carrie'],
+	packages=['carrie', 'carrie.cmd'],
 	#scripts=['bin/carrie'],
 	entry_points={
 		'console_scripts': [

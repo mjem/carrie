@@ -4,25 +4,23 @@
 There does not appear to be a reliable, neat, cross-desktop solution.
 """
 
+import argparse
+
+from carrie import xscreensaver
+
 def main():
 	"""Entry point to `stop-screensaver` command line tool."""
 
 	parser = argparse.ArgumentParser(
 		description='Disable X screensavers by periodically sending small mouse movements')
-	parser.add_argument('--stop-xscreensaver',
-						action='store_true')
 	parser.add_argument('--delay',
 						type=int,
-						help=('Number of seconds between mouse nudges if --stop-xscreensaver is '
-							  'used'))
+						default=180,
+						help='Number of seconds between mouse nudges')
 	args = parser.parse_args()
-		# Spawn a separate thread for the screensaver stopper
-	# if args.stop_xscreensaver:
-	# 	stop_xscreensaver = xscreensaver.StopXScreensaver(180)
-	# 	logging.debug('Starting thead')
-	# 	stop_xscreensaver.deamon = True
-	# 	stop_xscreensaver.start()
-	# 	logging.debug('main')
+
+	stop_xscreensaver = xscreensaver.StopXScreensaver(args.delay)
+	stop_xscreensaver.run()  # run in own thread; we don't use the threading option
 
 if __name__ == '__main__':
 	main()

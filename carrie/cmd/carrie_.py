@@ -25,9 +25,7 @@ from carrie import log
 from carrie import fifo
 from carrie import server
 
-DEFAULT_FIFO = '/tmp/mplayer.fifo'
 DEFAULT_PORT = 5505
-
 
 def main():
 	"""Entry point to `carrie` command line tool."""
@@ -38,7 +36,6 @@ def main():
     # under certain conditions; type `carrie --license' for details.
 	parser = argparse.ArgumentParser(description='Carrie remote control server')
 	parser.add_argument('--fifo', '-f',
-						default=DEFAULT_FIFO,
 						help='Name of mplayer fifo')
 	parser.add_argument('--console',
 						action='store_true',

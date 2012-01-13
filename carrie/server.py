@@ -91,16 +91,18 @@ def pause():
 	"""Try to play/pause an youtube or iplayer widget. If not found, send play/pause
 	to the mplayer fifo.
 	"""
-	if xorg.autopause() is None:
-		return "ok (flash)"
+	# if xorg.autopause() is None:
+	# 	return "ok (flash)"
 
-	else:
-		res = fifo.send("pause")
-		if res == 'ok':
-			return 'ok'
+	# else:
+	# 	res = fifo.send("pause")
+	# 	if res == 'ok':
+	# 		return 'ok'
 
-		else:
-			return 'no media player found'
+	# 	else:
+	# 		return 'no media player found'
+
+	return xorg.auto_command('pause')['message']
 
 
 @app.route('/forward/<int:seconds>')
@@ -142,11 +144,14 @@ def voldown():
 @app.route('/fullscreen')
 def fullscreen():
 	"""Toggle fullscreen mode in flash control or mplayer."""
-	if xorg.autofullscreen() is None:
-		return "ok (flash)"
+	return xorg.auto_command('fullscreen')['message']
+	# if xorg.autofullscreen() is None:
+	# 	return "ok (flash)"
 
-	else:
-		return fifo.send("vo_fullscreen")
+	# else:
+	# 	# logging.info('Moving window to front')
+	# 	xorg.shell('xdotool', 'search', '--class', 'mplayer', 'windowactivate')
+	# 	return fifo.send("vo_fullscreen")
 
 
 @app.route('/mute')
