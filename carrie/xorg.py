@@ -89,11 +89,15 @@ def raw_list(print_line=False, print_match=False):
 def fs_match(stack):
 	"""Matches either YouTube or iPlayer full screen window"""
 	# firefox fullscreen
-	if len(stack) == 2:
-		if '(has no name): ()' in stack[-2]['name']:
-			if '"<unknown>": ("<unknown>" "<unknown>")' in stack[-1]['name']:
-				stack[-1]['type'] = 'fs'
-				return stack[-1]
+	#  - a stack of 2 (gnome) or 3 (xfce) windows
+	#  - outermost has "unknown..." in name
+	#  - outermost - 1 has no name
+	if (len(stack) in (2, 3) and
+		'"<unknown>": ("<unknown>" "<unknown>")' in stack[-1]['name'] and
+		'(has no name): ()' in stack[-2]['name']):
+
+		stack[-1]['type'] = 'fs'
+		return stack[-1]
 
 	# chromium fullscreen
 	if len(stack) == 2:
@@ -104,13 +108,21 @@ def fs_match(stack):
 	return None
 
 def youtube_match(stack):
-	if len(stack) == 5:
-		# print 'Stack is five'
-		# look for a Firefox Youtube (stack of 5 items, YouTube in last but one)
-		if 'YouTube' in stack[-4]['name']:
-			# print 'and YouTube is there'
-			stack[-1]['type'] = 'youtube'
-			return stack[-1]
+	# for e, x in enumerate(stack):
+	# 	print '  ' + ' ' * e + x['name']
+	# print 'Stack is five -4 name is ', stack[-4]['name']
+	# look for a Firefox Youtube:
+	#  - stack of 5 items
+	#  - innermost has unknowns
+	#  - we don't care about the middle 3
+	#  - outermost has YouTube in the name
+	if (len(stack) >= 5 and
+		'YouTube' in stack[-5]['name'] and
+		'"<unknown>": ("<unknown>" "<unknown>")' in stack[-1]['name']):
+
+		# print 'and YouTube is there'
+		stack[-1]['type'] = 'youtube'
+		return stack[-1]
 
 		# look for a Chromium Youtube (stack of 5 items, YouTube in last)
 	if len(stack) == 4:
@@ -260,7 +272,7 @@ def auto_command(command):
 		return command_to_player(command, player)
 
 	else:
-		return None
+		return {'ok': False, 'message': 'no players found'}
 
 # def win_info(win_id):
 # 	"""For window (int) `win_id` return a tuple of:
