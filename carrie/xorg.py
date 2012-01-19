@@ -89,7 +89,7 @@ def raw_list(print_line=False, print_match=False):
 def fs_match(stack):
 	"""Matches either YouTube or iPlayer full screen window"""
 	# firefox fullscreen
-	#  - a stack of 2 (gnome) or 3 (xfce) windows
+	#  - a stack of 2 (gnome/debian) or 3 (gnome/mint) windows
 	#  - outermost has "unknown..." in name
 	#  - outermost - 1 has no name
 	if (len(stack) in (2, 3) and
@@ -100,10 +100,15 @@ def fs_match(stack):
 		return stack[-1]
 
 	# chromium fullscreen
-	if len(stack) == 2:
-		if '"exe": ("exe" "Exe")' in stack[-1]['name']:
-			stack[-1]['type'] = 'fs'
-			return stack[-1]
+	#  - a stack of 2 (gnome/debian) or 3 (gnome/mint) windows
+	#  - outermost has "exe..." in name
+	#  - outermost take 1 has no name
+	if (len(stack) in (2, 3) and
+		'"exe": ("exe" "Exe")' in stack[-1]['name'] and
+		"(has no name): ()" in stack[-2]['name']):
+
+		stack[-1]['type'] = 'fs'
+		return stack[-1]
 
 	return None
 
@@ -125,12 +130,13 @@ def youtube_match(stack):
 		return stack[-1]
 
 		# look for a Chromium Youtube (stack of 5 items, YouTube in last)
-	if len(stack) == 4:
-		if '"exe": ("exe" "Exe")' in stack[-1]['name']:
-			if 'YouTube' in stack[-4]['name']:
-				# print 'and YouTube is theree'
-				stack[-1]['type'] = 'youtube'
-				return stack[-1]
+	if (len(stack) >= 4 and
+		'"exe": ("exe" "Exe")' in stack[-1]['name'] and
+		'YouTube' in stack[-4]['name']):
+
+		# print 'and YouTube is theree'
+		stack[-1]['type'] = 'youtube'
+		return stack[-1]
 
 def iplayer_match(stack):
 	if len(stack) >= 5:
@@ -167,7 +173,9 @@ def player_list(print_line=False, print_match=False, print_player=False):
 	return res
 
 def top_player(print_line=False, print_match=False, print_player=False):
-	players = player_list(print_line=print_line, print_match=print_match, print_player=print_player)
+	players = player_list(print_line=print_line,
+						  print_match=print_match,
+						  print_player=print_player)
 
 	if len(players) == 0:
 		logging.error('No players found')
@@ -208,6 +216,7 @@ def keypress(key):
 
 
 def command_to_player(command, player):
+	logging.debug('Sending command {command} to {player}'.format(command=command, player=player))
 	if player['type'] == 'youtube':
 		if command == 'pause':
 			return click(player, 0.01, 0.01)
